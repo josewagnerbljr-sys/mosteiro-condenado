@@ -1,4 +1,4 @@
-# 🕯️ Monge Arcano: O Mosteiro Condenado
+# 🕯️ Mosteiro Condenado: Monge Arcano
 
 > Desafio **DIO - Trilha Unity**: criar uma cena 3D no Unity com boa composição, aplicar física e publicar via WebGL.
 > Repositório de referência: [digitalinnovationone/trilha-unity](https://github.com/digitalinnovationone/trilha-unity)
@@ -9,7 +9,9 @@ Em vez de zumbis, você enfrenta **possuídos, espectros, criaturas infernais e 
 Você é o **Irmão Elian**, um monge com poderes arcanos.
 
 ## ▶️ Jogar online
-Após publicar (veja abaixo): `https://SEU_USUARIO.github.io/NOME_DO_REPOSITORIO/`
+**https://josewagnerbljr-sys.github.io/mosteiro-condenado/**
+
+(Hospedado no GitHub Pages a partir da pasta `docs/`. Se a página ainda mostrar a tela de aviso, o build WebGL ainda não foi publicado.)
 
 ## 🎮 Controles
 | Tecla | Ação |
@@ -50,7 +52,7 @@ Recursos escassos (essência e ervas), checkpoints no altar, 5 arquivos para col
 ## 🌐 Gerar o link jogável (WebGL + GitHub Pages)
 1. No Unity: **Monge Arcano → 3 - Gerar cena + Build WebGL** (saída em `docs/`).
 2. Commit e push da pasta `docs` (`bash scripts/atualizar-build-webgl.sh`).
-3. GitHub → **Settings → Pages → Branch `main`, pasta `/docs`**. O link aparece em 1 a 2 minutos.
+3. GitHub → **Settings → Pages → Branch `main`, pasta `/docs`**. O link aparece em 1 a 3 minutos.
 
 Build por linha de comando (opcional):
 ```bash
@@ -58,9 +60,9 @@ Unity -batchmode -quit -projectPath . -executeMethod MongeArcano.EditorTools.Con
 ```
 
 ## 📤 Subir para o GitHub (Git Bash)
-1. Crie um repositório **vazio** no GitHub.
+1. Repositório: `https://github.com/josewagnerbljr-sys/mosteiro-condenado` (criado vazio).
 2. Na raiz do projeto, no Git Bash: `bash scripts/publicar-no-github.sh`
-3. Cole a URL do repositório quando solicitado.
+3. Aperte ENTER para aceitar a URL padrão.
 
 > Dica: abra o projeto no Unity **antes** de publicar para que `Assets/Scenes`, `Resources/Materiais` e os arquivos `.meta` sejam gerados e versionados. Nunca ignore `.meta` no `.gitignore`.
 
@@ -84,4 +86,10 @@ scripts/             Automação de publicação (Git Bash)
 - Para trocar por modelos próprios: substitua os filhos visuais dos prefabs/objetos mantendo os componentes.
 
 ## 👤 Autor
-**José Wagner Blanco Júnior**, Maringá/PR. Projeto de portfólio DIO. Licença MIT.
+**José Wagner Blanco Júnior**, Maringá/PR
+
+- GitHub: [josewagnerbljr-sys](https://github.com/josewagnerbljr-sys)
+- DIO: [consultoriablanco8](https://web.dio.me/users/consultoriablanco8)
+- LinkedIn: [blancoconsultoria](https://www.linkedin.com/in/blancoconsultoria)
+
+Projeto de portfólio do desafio DIO (Trilha Unity). Licença MIT.
