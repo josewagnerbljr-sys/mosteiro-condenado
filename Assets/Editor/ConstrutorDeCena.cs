@@ -39,6 +39,26 @@ namespace MongeArcano.EditorTools
             PlayerSettings.defaultWebScreenHeight = 720;
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(CaminhoCena, true) };
+            GarantirEntradaLegada();
+        }
+
+        // O jogo usa o Input clássico (teclado). Em Unity 6 o padrão pode ser só o novo Input System.
+        static void GarantirEntradaLegada()
+        {
+            try
+            {
+                Object[] assets = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/ProjectSettings.asset");
+                if (assets == null || assets.Length == 0) return;
+                SerializedObject so = new SerializedObject(assets[0]);
+                SerializedProperty p = so.FindProperty("activeInputHandler");
+                if (p != null && p.intValue == 1)
+                {
+                    p.intValue = 2; // 0 = antigo, 1 = novo, 2 = ambos
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                    Debug.LogWarning("[Monge Arcano] Entrada de teclado ajustada para 'Ambos'. Se o Unity pedir, reinicie o editor.");
+                }
+            }
+            catch (System.Exception e) { Debug.LogWarning("[Monge Arcano] Não foi possível ajustar a entrada: " + e.Message); }
         }
     }
 

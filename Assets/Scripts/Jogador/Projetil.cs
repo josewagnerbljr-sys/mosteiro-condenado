@@ -26,13 +26,13 @@ namespace MongeArcano
         {
             rb = GetComponent<Rigidbody>();
             ultimaDir = dir.normalized;
-            rb.velocity = ultimaDir * velocidade;
+            rb.SetVel(ultimaDir * velocidade);
             transform.forward = ultimaDir;
         }
 
         void FixedUpdate()
         {
-            if (rb != null && rb.velocity.sqrMagnitude > 1f) ultimaDir = rb.velocity.normalized;
+            if (rb != null && rb.GetVel().sqrMagnitude > 1f) ultimaDir = rb.GetVel().normalized;
         }
 
         void OnCollisionEnter(Collision c)

@@ -132,7 +132,7 @@ namespace MongeArcano
             if (corpo == null || corpo.isKinematic || hit.moveDirection.y < -0.3f) return;
             if (hit.collider.GetComponentInParent<Inimigo>() != null) return;
             Vector3 dir = new Vector3(hit.moveDirection.x, 0f, hit.moveDirection.z);
-            corpo.velocity = dir * 2.2f;
+            corpo.SetVel(dir * 2.2f);
         }
 
         // ------------------------------------------------------------------ interação

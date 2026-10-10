@@ -82,7 +82,7 @@ namespace MongeArcano
             Vector3 para = jogador.transform.position - transform.position;
             Vector3 plano = new Vector3(para.x, 0f, para.z);
             float dist = plano.magnitude;
-            Vector3 v = rb.velocity;
+            Vector3 v = rb.GetVel();
 
             if (flutua)
             {
@@ -93,7 +93,7 @@ namespace MongeArcano
             if (Time.time < atordoadoAte)
             {
                 v.x *= 0.9f; v.z *= 0.9f;
-                rb.velocity = v;
+                rb.SetVel(v);
                 return;
             }
 
@@ -103,7 +103,7 @@ namespace MongeArcano
                 else
                 {
                     v.x = 0f; v.z = 0f;
-                    rb.velocity = v;
+                    rb.SetVel(v);
                     return;
                 }
             }
@@ -111,7 +111,7 @@ namespace MongeArcano
             if (jogador.Morto)
             {
                 v.x = 0f; v.z = 0f;
-                rb.velocity = v;
+                rb.SetVel(v);
                 return;
             }
 
@@ -130,7 +130,7 @@ namespace MongeArcano
                 v.x = d.x; v.z = d.z;
             }
             else { v.x = 0f; v.z = 0f; }
-            rb.velocity = v;
+            rb.SetVel(v);
 
             if (dist <= alcanceAtaque && Mathf.Abs(para.y) < 2.4f && Time.time >= proxAtaque)
             {
@@ -228,7 +228,7 @@ namespace MongeArcano
 
             foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
             foreach (Light l in GetComponentsInChildren<Light>()) l.enabled = false;
-            rb.velocity = Vector3.zero;
+            rb.SetVel(Vector3.zero);
             rb.isKinematic = true;
             Som.Tocar(TipoSom.Morte, transform.position, 0.9f);
 
