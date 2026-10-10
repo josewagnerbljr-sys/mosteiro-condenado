@@ -44,7 +44,7 @@ Recursos escassos (essência e ervas), checkpoints no altar, 5 arquivos para col
 - **Zero assets externos**: modelos feitos com primitivas + materiais criados por código; áudio sintetizado por código (sem direitos autorais).
 
 ## 🛠️ Como abrir no Unity Hub
-1. Instale o **Unity 2022.3 LTS** com o módulo **WebGL Build Support** (qualquer 2022.3.x serve; se a versão exata não estiver instalada, o Hub deixa escolher a que você tem).
+1. Instale o **Unity 6 (6000.6.4f1)** com o módulo **WebGL Build Support**. O projeto foi criado no 2022.3 LTS e atualizado para o Unity 6.
 2. Unity Hub → **Add → Add project from disk** → selecione esta pasta.
 3. Ao abrir, o projeto **gera sozinho** a cena `Assets/Scenes/Mosteiro.unity` e os materiais (aguarde ~10 s). Se não gerar, use o menu **Monge Arcano → 1 - Gerar cena do Mosteiro**.
 4. Aperte **Play** e jogue.
