@@ -1,0 +1,7 @@
+* text=auto
+*.cs text eol=lf diff=csharp
+*.md text eol=lf
+*.sh text eol=lf
+*.unity merge=binary -text
+*.mat merge=binary -text
+*.asset merge=binary -text
