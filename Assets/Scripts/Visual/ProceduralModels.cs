@@ -90,6 +90,9 @@ namespace MongeArcano
             visual.transform.SetParent(raiz.transform, false);
             Transform v = visual.transform;
 
+            GameObject malhaMonge = Modelos.Instanciar("monge_clerigo", v, 1.8f, 0f);
+            if (malhaMonge == null)
+            {
             Prim(PrimitiveType.Cylinder, v, "Manto", new Vector3(0f, 0.62f, 0f), new Vector3(0.78f, 0.62f, 0.78f), "Tecido");
             Prim(PrimitiveType.Cylinder, v, "Faixa", new Vector3(0f, 0.95f, 0f), new Vector3(0.66f, 0.07f, 0.66f), "TecidoEscuro");
             Prim(PrimitiveType.Sphere, v, "Peito", new Vector3(0f, 1.22f, 0f), new Vector3(0.62f, 0.42f, 0.46f), "Tecido");
@@ -102,12 +105,16 @@ namespace MongeArcano
                 float a = i * Mathf.PI / 5f - Mathf.PI / 2.5f;
                 Prim(PrimitiveType.Sphere, v, "Conta" + i, new Vector3(Mathf.Sin(a) * 0.17f, 1.36f - Mathf.Abs(Mathf.Sin(a)) * 0.05f, 0.2f), Vector3.one * 0.045f, "Ouro");
             }
+            }
 
             GameObject pivo = new GameObject("PivoCajado");
             pivo.transform.SetParent(raiz.transform, false);
             pivo.transform.localPosition = new Vector3(0.42f, 1.05f, 0.2f);
-            Prim(PrimitiveType.Cylinder, pivo.transform, "Cajado", new Vector3(0f, 0.1f, 0f), new Vector3(0.05f, 0.8f, 0.05f), "Madeira");
-            Prim(PrimitiveType.Sphere, pivo.transform, "Orbe", new Vector3(0f, 0.95f, 0f), Vector3.one * 0.2f, "EmissaoAzul");
+            if (malhaMonge == null)
+            {
+                Prim(PrimitiveType.Cylinder, pivo.transform, "Cajado", new Vector3(0f, 0.1f, 0f), new Vector3(0.05f, 0.8f, 0.05f), "Madeira");
+                Prim(PrimitiveType.Sphere, pivo.transform, "Orbe", new Vector3(0f, 0.95f, 0f), Vector3.one * 0.2f, "EmissaoAzul");
+            }
             Luz(pivo.transform, "LuzOrbe", new Vector3(0f, 0.95f, 0f), new Color(0.35f, 0.7f, 1f), 1.6f, 7f, true);
 
             GameObject ponto = new GameObject("PontoDisparo");
@@ -116,7 +123,19 @@ namespace MongeArcano
 
             Luz(raiz.transform, "LuzJogador", new Vector3(0f, 1.8f, -0.2f), new Color(0.75f, 0.85f, 1f), 0.9f, 7f, false);
 
+            GameObject escudo = Prim(PrimitiveType.Sphere, raiz.transform, "EscudoMistico", new Vector3(0f, 1f, 0f), Vector3.one * 2.3f, "Fantasma");
+            escudo.SetActive(false);
+            AnimadorProcedural an = raiz.AddComponent<AnimadorProcedural>();
+            an.corpo = v;
+            an.frequencia = 9f;
+            an.inclinacao = 7f;
+            an.balancoCorpo = 0.06f;
+            an.rolagem = 2f;
+            an.passos = true;
+
             PlayerController pc = raiz.AddComponent<PlayerController>();
+            pc.escudoVisual = escudo;
+            pc.anim = an;
             pc.visual = v;
             pc.pivoCajado = pivo.transform;
             pc.pontoDisparo = ponto.transform;
@@ -134,53 +153,112 @@ namespace MongeArcano
             Rigidbody rb = go.AddComponent<Rigidbody>();
             rb.mass = 1f;
             CapsuleCollider cap = go.AddComponent<CapsuleCollider>();
-            cap.height = 1.9f;
-            cap.radius = 0.4f;
-            cap.center = new Vector3(0f, 0.95f, 0f);
             Inimigo ini = go.AddComponent<Inimigo>();
             ini.tipo = tipo;
 
+            GameObject modeloGo = new GameObject("Modelo");
+            modeloGo.transform.SetParent(t, false);
+            Transform m = modeloGo.transform;
+            AnimadorProcedural an = go.AddComponent<AnimadorProcedural>();
+            an.corpo = m;
+            ini.anim = an;
+
             GameObject mira = new GameObject("PontoMira");
             mira.transform.SetParent(t, false);
-            mira.transform.localPosition = new Vector3(0f, 1.2f, 0f);
             ini.pontoMira = mira.transform;
+
+            // modelo 3D (nome, altura em metros, raio do colisor, pintura opcional)
+            string nomeModelo = "aparicao"; float altura = 2f, raio = 0.45f; string pintura = null;
+            switch (tipo)
+            {
+                case TipoInimigo.Possuido: nomeModelo = "aparicao"; altura = 2.0f; raio = 0.45f; break;
+                case TipoInimigo.Espectro: nomeModelo = "espectro"; altura = 2.0f; raio = 0.4f; break;
+                case TipoInimigo.Infernal: nomeModelo = "demonio"; altura = 2.6f; raio = 0.55f; break;
+                case TipoInimigo.Arconte: nomeModelo = "boss_morte"; altura = 3.6f; raio = 0.8f; break;
+                case TipoInimigo.Esqueleto: nomeModelo = "esqueleto_guerreiro"; altura = 1.8f; raio = 0.4f; break;
+                case TipoInimigo.Armadura: nomeModelo = "armadura_assombrada"; altura = 2.1f; raio = 0.5f; break;
+                case TipoInimigo.BruxaVermelha: nomeModelo = "bruxa"; altura = 1.9f; raio = 0.42f; pintura = "BruxaVermelha"; break;
+                case TipoInimigo.BruxaNegra: nomeModelo = "bruxa"; altura = 1.8f; raio = 0.42f; pintura = "BruxaNegra"; break;
+                case TipoInimigo.BruxaCinza: nomeModelo = "bruxa"; altura = 1.8f; raio = 0.42f; pintura = "BruxaCinza"; break;
+                case TipoInimigo.Monstro: nomeModelo = "monstro"; altura = 3.4f; raio = 0.8f; break;
+            }
+
+            GameObject malha = Modelos.Instanciar(nomeModelo, m, altura, 0f, pintura);
+            if (malha == null)
+            {
+                // sem o modelo importado: usa as formas simples do protótipo
+                altura = 1.9f; raio = 0.4f;
+                switch (tipo)
+                {
+                    case TipoInimigo.Espectro: ConstruirEspectro(m); break;
+                    case TipoInimigo.Infernal: ConstruirInfernal(m); go.transform.localScale = Vector3.one * 1.25f; break;
+                    case TipoInimigo.Arconte: ConstruirArconte(m); go.transform.localScale = Vector3.one * 1.6f; break;
+                    default: ConstruirPossuido(m); break;
+                }
+            }
+            cap.height = altura;
+            cap.radius = raio;
+            cap.center = new Vector3(0f, altura * 0.5f, 0f);
+            mira.transform.localPosition = new Vector3(0f, altura * 0.62f, 0f);
 
             switch (tipo)
             {
                 case TipoInimigo.Possuido:
-                    ConstruirPossuido(t);
-                    ini.nomeExibido = "Possuído";
-                    ini.vidaMax = 60f; ini.velocidade = 1.5f; ini.dano = 15f; ini.alcanceAtaque = 1.5f;
-                    ini.deteccao = 8f; ini.intervaloAtaque = 1.4f; ini.chanceDrop = 0.35f;
+                    ini.nomeExibido = "Possuído"; ini.vidaMax = 60f; ini.velocidade = 1.5f; ini.dano = 15f; ini.alcanceAtaque = 1.5f;
+                    ini.deteccao = 8f; ini.intervaloAtaque = 1.4f; ini.chanceDrop = 0.35f; ini.xp = 18f;
+                    an.frequencia = 4f; an.inclinacao = 10f; an.balancoCorpo = 0.05f;
                     break;
-
                 case TipoInimigo.Espectro:
-                    ConstruirEspectro(t);
-                    cap.height = 1.7f; cap.radius = 0.4f; cap.center = new Vector3(0f, 1.1f, 0f);
-                    ini.nomeExibido = "Espectro";
-                    ini.vidaMax = 40f; ini.velocidade = 3.3f; ini.dano = 9f; ini.alcanceAtaque = 1.4f;
-                    ini.deteccao = 9f; ini.intervaloAtaque = 1.0f; ini.chanceDrop = 0.3f;
+                    ini.nomeExibido = "Espectro"; ini.vidaMax = 40f; ini.velocidade = 3.3f; ini.dano = 9f; ini.alcanceAtaque = 1.4f;
+                    ini.deteccao = 9f; ini.intervaloAtaque = 1.0f; ini.chanceDrop = 0.3f; ini.xp = 14f;
                     ini.flutua = true; ini.alturaFlutuar = 0.7f;
+                    an.frequencia = 3f; an.rolagem = 5f; an.oscilacaoOciosa = 0.08f;
                     break;
-
                 case TipoInimigo.Infernal:
-                    ConstruirInfernal(t);
-                    go.transform.localScale = Vector3.one * 1.25f;
-                    cap.height = 2.1f; cap.radius = 0.5f; cap.center = new Vector3(0f, 1.05f, 0f);
-                    ini.nomeExibido = "Criatura Infernal";
-                    ini.vidaMax = 120f; ini.velocidade = 2.4f; ini.dano = 22f; ini.alcanceAtaque = 1.9f;
-                    ini.deteccao = 10f; ini.intervaloAtaque = 1.3f; ini.chanceDrop = 0.6f;
+                    ini.nomeExibido = "Criatura Infernal"; ini.vidaMax = 120f; ini.velocidade = 2.4f; ini.dano = 22f; ini.alcanceAtaque = 1.9f;
+                    ini.deteccao = 10f; ini.intervaloAtaque = 1.3f; ini.chanceDrop = 0.6f; ini.xp = 45f;
+                    an.frequencia = 6f; an.inclinacao = 8f; an.balancoCorpo = 0.06f;
                     break;
-
-                default:
-                    ConstruirArconte(t);
-                    go.transform.localScale = Vector3.one * 1.6f;
-                    cap.height = 2.8f; cap.radius = 0.7f; cap.center = new Vector3(0f, 1.4f, 0f);
-                    mira.transform.localPosition = new Vector3(0f, 1.8f, 0.4f);
-                    ini.nomeExibido = "Arconte das Cinzas";
-                    ini.vidaMax = 400f; ini.velocidade = 1.9f; ini.dano = 30f; ini.alcanceAtaque = 2.8f;
-                    ini.deteccao = 14f; ini.intervaloAtaque = 1.6f; ini.chanceDrop = 0f;
+                case TipoInimigo.Arconte:
+                    ini.nomeExibido = "Arconte das Cinzas"; ini.vidaMax = 400f; ini.velocidade = 1.9f; ini.dano = 30f; ini.alcanceAtaque = 2.8f;
+                    ini.deteccao = 14f; ini.intervaloAtaque = 1.6f; ini.chanceDrop = 0f; ini.xp = 300f;
                     ini.chefe = true; ini.ataqueADistancia = true; ini.danoDistancia = 18f; ini.intervaloDisparo = 3f;
+                    mira.transform.localPosition = new Vector3(0f, altura * 0.55f, 0.4f);
+                    an.frequencia = 2.2f; an.rolagem = 3f; an.oscilacaoOciosa = 0.08f;
+                    break;
+                case TipoInimigo.Esqueleto:
+                    ini.nomeExibido = "Esqueleto Guerreiro"; ini.vidaMax = 70f; ini.velocidade = 2.3f; ini.dano = 14f; ini.alcanceAtaque = 1.6f;
+                    ini.deteccao = 9f; ini.intervaloAtaque = 1.2f; ini.chanceDrop = 0.3f; ini.xp = 20f;
+                    an.frequencia = 7f; an.inclinacao = 8f; an.balancoCorpo = 0.06f;
+                    break;
+                case TipoInimigo.Armadura:
+                    ini.nomeExibido = "Armadura Assombrada"; ini.vidaMax = 150f; ini.velocidade = 1.7f; ini.dano = 24f; ini.alcanceAtaque = 1.8f;
+                    ini.deteccao = 3.6f; ini.intervaloAtaque = 1.5f; ini.chanceDrop = 0.5f; ini.xp = 50f;
+                    an.frequencia = 4.5f; an.inclinacao = 6f; an.balancoCorpo = 0.04f;
+                    break;
+                case TipoInimigo.BruxaVermelha:
+                    ini.nomeExibido = "Bruxa Mestra"; ini.vidaMax = 170f; ini.velocidade = 1.4f; ini.dano = 12f; ini.alcanceAtaque = 1.6f;
+                    ini.deteccao = 13f; ini.intervaloAtaque = 1.6f; ini.chanceDrop = 0.7f; ini.xp = 90f;
+                    ini.ataqueADistancia = true; ini.danoDistancia = 16f; ini.intervaloDisparo = 2.2f;
+                    ini.invocadora = true; ini.intervaloInvocacao = 14f;
+                    an.frequencia = 5f; an.oscilacaoOciosa = 0.03f;
+                    break;
+                case TipoInimigo.BruxaNegra:
+                    ini.nomeExibido = "Bruxa Invocadora"; ini.vidaMax = 110f; ini.velocidade = 1.5f; ini.dano = 10f; ini.alcanceAtaque = 1.6f;
+                    ini.deteccao = 12f; ini.intervaloAtaque = 1.6f; ini.chanceDrop = 0.6f; ini.xp = 60f;
+                    ini.invocadora = true; ini.intervaloInvocacao = 11f;
+                    an.frequencia = 5f; an.oscilacaoOciosa = 0.03f;
+                    break;
+                case TipoInimigo.BruxaCinza:
+                    ini.nomeExibido = "Bruxa Lançadora"; ini.vidaMax = 95f; ini.velocidade = 1.9f; ini.dano = 10f; ini.alcanceAtaque = 1.6f;
+                    ini.deteccao = 12f; ini.intervaloAtaque = 1.4f; ini.chanceDrop = 0.5f; ini.xp = 50f;
+                    ini.ataqueADistancia = true; ini.danoDistancia = 10f; ini.intervaloDisparo = 1.3f;
+                    an.frequencia = 5.5f; an.oscilacaoOciosa = 0.03f;
+                    break;
+                default:
+                    ini.nomeExibido = "Monstro"; ini.vidaMax = 280f; ini.velocidade = 2.0f; ini.dano = 34f; ini.alcanceAtaque = 2.6f;
+                    ini.deteccao = 10f; ini.intervaloAtaque = 1.6f; ini.chanceDrop = 0.8f; ini.xp = 100f;
+                    an.frequencia = 3.5f; an.inclinacao = 5f; an.balancoCorpo = 0.08f;
                     break;
             }
             ini.vida = ini.vidaMax;
@@ -290,6 +368,14 @@ namespace MongeArcano
                     c.automatico = true;
                     break;
 
+                case TipoColetavel.Frasco:
+                    Prim(PrimitiveType.Sphere, t, "Corpo", new Vector3(0f, -0.05f, 0f), new Vector3(0.3f, 0.34f, 0.3f), "EmissaoAzul");
+                    Prim(PrimitiveType.Cylinder, t, "Gargalo", new Vector3(0f, 0.17f, 0f), new Vector3(0.1f, 0.08f, 0.1f), "Osso");
+                    Luz(t, "Luz", Vector3.zero, new Color(0.3f, 0.65f, 1f), 0.9f, 3.5f, false);
+                    c.valor = 12f;
+                    c.automatico = true;
+                    break;
+
                 case TipoColetavel.Chave:
                     ConstruirChave(t, chaveId);
                     c.automatico = false;
@@ -338,7 +424,11 @@ namespace MongeArcano
             go.transform.position = pos;
             string mat = amigavel ? "EmissaoAzul" : "EmissaoVermelha";
             float r = amigavel ? 0.14f : 0.3f;
-            Prim(PrimitiveType.Sphere, go.transform, "Nucleo", Vector3.zero, Vector3.one * r * 2f, mat);
+            Prim(PrimitiveType.Sphere, go.transform, "Nucleo", Vector3.zero, Vector3.one * r * 1.1f, mat);
+            Color cf = amigavel ? new Color(0.45f, 0.6f, 1f) : new Color(1f, 0.35f, 0.12f);
+            Fx.Halo(go.transform, cf, r * (amigavel ? 9f : 7f));
+            Fx.Rastro(go, cf, r * 1.7f);
+            Fx.FaiscasContinuas(go.transform, cf);
 
             SphereCollider sc = go.AddComponent<SphereCollider>();
             sc.radius = r;

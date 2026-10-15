@@ -13,19 +13,29 @@ namespace MongeArcano.EditorTools
             if (!AssetDatabase.IsValidFolder("Assets/Resources")) AssetDatabase.CreateFolder("Assets", "Resources");
             if (!AssetDatabase.IsValidFolder(Pasta)) AssetDatabase.CreateFolder("Assets/Resources", "Materiais");
 
-            Solido("Pedra", new Color(0.30f, 0.29f, 0.32f), 0f, 0.15f);
-            Solido("PedraClara", new Color(0.52f, 0.50f, 0.46f), 0f, 0.2f);
-            Solido("Piso", new Color(0.20f, 0.18f, 0.17f), 0f, 0.3f);
-            Solido("Madeira", new Color(0.30f, 0.17f, 0.09f), 0f, 0.15f);
-            Solido("Tapete", new Color(0.35f, 0.04f, 0.06f), 0f, 0.05f);
-            Solido("Tecido", new Color(0.90f, 0.45f, 0.06f), 0f, 0.1f);
-            Solido("TecidoEscuro", new Color(0.40f, 0.11f, 0.03f), 0f, 0.1f);
-            Solido("Pele", new Color(0.76f, 0.56f, 0.42f), 0f, 0.2f);
-            Solido("Ouro", new Color(0.90f, 0.70f, 0.20f), 0.8f, 0.6f);
-            Solido("CarnePodre", new Color(0.35f, 0.42f, 0.30f), 0f, 0.1f);
-            Solido("PeleInfernal", new Color(0.45f, 0.05f, 0.05f), 0f, 0.35f);
-            Solido("Osso", new Color(0.82f, 0.79f, 0.68f), 0f, 0.2f);
-            Solido("Papel", new Color(0.88f, 0.82f, 0.64f), 0f, 0.05f);
+            Solido("Pedra", new Color(0.20f, 0.20f, 0.23f), 0f, 0.15f);
+            Solido("PedraClara", new Color(0.34f, 0.33f, 0.32f), 0f, 0.2f);
+            Solido("Piso", new Color(0.12f, 0.11f, 0.11f), 0f, 0.3f);
+            Solido("Madeira", new Color(0.20f, 0.12f, 0.07f), 0f, 0.15f);
+            Solido("Tapete", new Color(0.28f, 0.03f, 0.05f), 0f, 0.05f);
+            Solido("Tecido", new Color(0.78f, 0.40f, 0.08f), 0f, 0.1f);
+            Solido("TecidoEscuro", new Color(0.30f, 0.08f, 0.02f), 0f, 0.1f);
+            Solido("Pele", new Color(0.70f, 0.52f, 0.40f), 0f, 0.2f);
+            Solido("Ouro", new Color(0.80f, 0.60f, 0.18f), 0.8f, 0.6f);
+            Solido("CarnePodre", new Color(0.30f, 0.37f, 0.26f), 0f, 0.1f);
+            Solido("PeleInfernal", new Color(0.38f, 0.04f, 0.04f), 0f, 0.35f);
+            Solido("Osso", new Color(0.72f, 0.69f, 0.60f), 0f, 0.2f);
+            Solido("Papel", new Color(0.85f, 0.80f, 0.62f), 0f, 0.05f);
+            Solido("Terra", new Color(0.06f, 0.055f, 0.045f), 0f, 0.05f);
+            Solido("Caminho", new Color(0.17f, 0.17f, 0.17f), 0f, 0.15f);
+            Solido("PedraMusgo", new Color(0.17f, 0.21f, 0.17f), 0f, 0.1f);
+            Solido("MadeiraMorta", new Color(0.12f, 0.09f, 0.07f), 0f, 0.05f);
+            Solido("MongeTunica", new Color(0.70f, 0.38f, 0.10f), 0f, 0.1f);
+            Solido("Armadura", new Color(0.26f, 0.27f, 0.32f), 0.8f, 0.5f);
+            Solido("NecromanteRoupa", new Color(0.20f, 0.16f, 0.26f), 0f, 0.1f);
+            Solido("BruxaVermelha", new Color(0.50f, 0.07f, 0.09f), 0f, 0.1f);
+            Solido("BruxaNegra", new Color(0.07f, 0.06f, 0.09f), 0f, 0.1f);
+            Solido("BruxaCinza", new Color(0.42f, 0.43f, 0.47f), 0f, 0.1f);
             Solido("Obsidiana", new Color(0.05f, 0.04f, 0.07f), 0.5f, 0.75f);
 
             Emissivo("EmissaoAzul", new Color(0.25f, 0.62f, 1f));
@@ -37,15 +47,46 @@ namespace MongeArcano.EditorTools
             Emissivo("EmissaoDourada", new Color(1f, 0.8f, 0.25f));
 
             Fantasma("Fantasma", new Color(0.6f, 0.95f, 0.9f, 0.45f));
+            Especiais();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
 
+        static void Especiais()
+        {
+            string p = Pasta + "/FxAditivo.mat";
+            if (AssetDatabase.LoadAssetAtPath<Material>(p) == null)
+            {
+                Shader sh = Shader.Find("Legacy Shaders/Particles/Additive");
+                if (sh == null) sh = Shader.Find("Particles/Standard Unlit");
+                Material m = new Material(sh);
+                if (m.HasProperty("_TintColor")) m.SetColor("_TintColor", new Color(0.5f, 0.5f, 0.5f, 0.5f));
+                AssetDatabase.CreateAsset(m, p);
+            }
+            p = Pasta + "/CeuTrevas.mat";
+            if (AssetDatabase.LoadAssetAtPath<Material>(p) == null)
+            {
+                Shader sh = Shader.Find("Skybox/Procedural");
+                if (sh != null)
+                {
+                    Material m = new Material(sh);
+                    m.SetFloat("_SunSize", 0f);
+                    m.SetFloat("_AtmosphereThickness", 0.9f);
+                    m.SetColor("_SkyTint", new Color(0.42f, 0.17f, 0.2f));
+                    m.SetColor("_GroundColor", new Color(0.05f, 0.04f, 0.05f));
+                    m.SetFloat("_Exposure", 0.7f);
+                    m.EnableKeyword("_SUNDISK_NONE");
+                    AssetDatabase.CreateAsset(m, p);
+                }
+            }
+        }
+
         static Material Novo(string nome, out string caminho)
         {
             caminho = Pasta + "/" + nome + ".mat";
-            if (AssetDatabase.LoadAssetAtPath<Material>(caminho) != null) return null;
+            Material existente = AssetDatabase.LoadAssetAtPath<Material>(caminho);
+            if (existente != null) return existente;
             return new Material(Shader.Find("Standard"));
         }
 
@@ -56,13 +97,13 @@ namespace MongeArcano.EditorTools
             m.color = cor;
             m.SetFloat("_Metallic", metal);
             m.SetFloat("_Glossiness", suave);
-            AssetDatabase.CreateAsset(m, p);
+            if (AssetDatabase.LoadAssetAtPath<Material>(p) == null) AssetDatabase.CreateAsset(m, p); else EditorUtility.SetDirty(m);
         }
 
         static void Emissivo(string nome, Color cor)
         {
+            if (AssetDatabase.LoadAssetAtPath<Material>(Pasta + "/" + nome + ".mat") != null) return;
             string p; Material m = Novo(nome, out p);
-            if (m == null) return;
             m.color = cor;
             m.SetFloat("_Glossiness", 0.4f);
             m.EnableKeyword("_EMISSION");
@@ -73,8 +114,8 @@ namespace MongeArcano.EditorTools
 
         static void Fantasma(string nome, Color cor)
         {
+            if (AssetDatabase.LoadAssetAtPath<Material>(Pasta + "/" + nome + ".mat") != null) return;
             string p; Material m = Novo(nome, out p);
-            if (m == null) return;
             m.SetFloat("_Mode", 3f);
             m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);

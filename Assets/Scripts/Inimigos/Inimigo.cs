@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MongeArcano
 {
-    public enum TipoInimigo { Possuido, Espectro, Infernal, Arconte }
+    public enum TipoInimigo { Possuido, Espectro, Infernal, Arconte, Esqueleto, Armadura, BruxaVermelha, BruxaNegra, BruxaCinza, Monstro }
 
     /// <summary>
     /// IA simples e robusta (sem NavMesh): desperta por proximidade/visão, persegue, ataca corpo a corpo
@@ -32,11 +32,16 @@ namespace MongeArcano
         public float danoDistancia = 18f;
         public float intervaloDisparo = 3f;
         public Transform pontoMira;
+        public bool invocadora;
+        public float intervaloInvocacao = 12f;
+        public float xp = 20f;
+        public AnimadorProcedural anim;
 
         Rigidbody rb;
         PlayerController jogador;
         Renderer[] rends;
         MaterialPropertyBlock mpb;
+        float proxInvocacao;
         float proxAtaque, proxDisparo, atordoadoAte, baseY, fase, proxGrunhido;
         bool ativo, morto, fase2;
 
@@ -136,6 +141,7 @@ namespace MongeArcano
             {
                 proxAtaque = Time.time + intervaloAtaque;
                 jogador.ReceberDano(dano, transform.position, 4f);
+                if (anim != null) anim.Atacar();
             }
 
             if (ataqueADistancia && dist > 3.5f && dist < 18f && Time.time >= proxDisparo)
@@ -147,17 +153,38 @@ namespace MongeArcano
                 Som.Tocar(TipoSom.Grunhido, origem, 0.9f);
             }
 
+            if (invocadora && Time.time >= proxInvocacao && dist < 18f)
+            {
+                proxInvocacao = Time.time + intervaloInvocacao;
+                int vivos = 0;
+                for (int i = 0; i < Ativos.Count; i++) if (Ativos[i] != null && Ativos[i].tipo == TipoInimigo.Esqueleto) vivos++;
+                if (vivos < 5)
+                {
+                    for (int k = 0; k < 2; k++)
+                    {
+                        Inimigo e = ProceduralModels.CriarInimigo(TipoInimigo.Esqueleto, transform.position + new Vector3(k == 0 ? -2f : 2f, 0f, 1.5f), 0f);
+                        e.deteccao = 40f;
+                        e.xp *= 0.5f;
+                        e.Despertar();
+                    }
+                    GameManager.Instance.Mostrar("A bruxa invoca servos das trevas!", 3f);
+                }
+                Som.Tocar(TipoSom.Encanto, transform.position, 0.8f);
+            }
+
             if (Time.time >= proxGrunhido)
             {
                 proxGrunhido = Time.time + Random.Range(4f, 9f);
-                Som.Tocar(TipoSom.Grunhido, transform.position, 0.45f);
+                bool bruxa = tipo == TipoInimigo.BruxaVermelha || tipo == TipoInimigo.BruxaNegra || tipo == TipoInimigo.BruxaCinza;
+                Som.Tocar(bruxa ? TipoSom.Encanto : (chefe ? TipoSom.Grito : TipoSom.Grunhido), transform.position, bruxa ? 0.7f : 0.45f);
             }
         }
 
         void Ativar()
         {
             ativo = true;
-            Som.Tocar(TipoSom.Grunhido, transform.position, 0.8f);
+            Som.Tocar(tipo == TipoInimigo.Armadura ? TipoSom.Grito : TipoSom.Grunhido, transform.position, 0.8f);
+            if (tipo == TipoInimigo.Armadura) GameManager.Instance.Mostrar("A armadura ganha vida!", 2.5f);
             if (chefe)
             {
                 GameManager.Instance.chefe = this;
@@ -171,6 +198,9 @@ namespace MongeArcano
             if (morto) return;
             if (!ativo) { ativo = true; if (chefe) { GameManager.Instance.chefe = this; } }
             vida -= quantidade;
+            if (GameManager.Instance != null && GameManager.Instance.jogador != null)
+                GameManager.Instance.jogador.AddPoder(Mathf.Min(quantidade, Mathf.Max(0f, vida + quantidade)) * 0.22f);
+            if (anim != null) anim.Atingido();
 
             if (empurrao > 0f && rb != null && !chefe)
             {
@@ -181,6 +211,7 @@ namespace MongeArcano
             }
 
             Piscar();
+            Fx.Faiscas(PontoMira, new Color(1f, 0.7f, 0.3f), 8, 3f, 0.08f, 0.4f);
             Som.Tocar(TipoSom.Impacto, transform.position, 0.6f);
 
             if (chefe && !fase2 && vida < vidaMax * 0.5f) EntrarFase2();
@@ -206,7 +237,10 @@ namespace MongeArcano
         void Piscar()
         {
             if (rends == null) return;
-            mpb.SetColor("_Color", new Color(3f, 3f, 3f, 1f));
+            Color branco = new Color(3f, 3f, 3f, 1f);
+            mpb.SetColor("_Color", branco);
+            mpb.SetColor("_BaseColor", branco);
+            mpb.SetColor("baseColorFactor", branco);
             for (int i = 0; i < rends.Length; i++) if (rends[i] != null) rends[i].SetPropertyBlock(mpb);
             CancelInvoke("LimparPisca");
             Invoke("LimparPisca", 0.08f);
@@ -225,16 +259,21 @@ namespace MongeArcano
             Ativos.Remove(this);
             GameManager gm = GameManager.Instance;
             gm.InimigosDerrotados++;
+            gm.Evento("matar", tipo.ToString());
+            gm.jogador.GanharXp(xp);
+            if (anim != null) anim.enabled = false;
 
             foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
             foreach (Light l in GetComponentsInChildren<Light>()) l.enabled = false;
             rb.SetVel(Vector3.zero);
             rb.isKinematic = true;
             Som.Tocar(TipoSom.Morte, transform.position, 0.9f);
+            Fx.Faiscas(PontoMira, new Color(1f, 0.45f, 0.15f), 45, 4.5f, 0.13f, 1.2f);
 
             if (Random.value < chanceDrop)
             {
-                TipoColetavel t = Random.value < 0.25f ? TipoColetavel.Erva : TipoColetavel.Essencia;
+                float r = Random.value;
+                TipoColetavel t = r < 0.2f ? TipoColetavel.Erva : (r < 0.4f ? TipoColetavel.Frasco : TipoColetavel.Essencia);
                 Vector3 p = transform.position;
                 ProceduralModels.CriarColetavel(t, new Vector3(p.x, 0.7f, p.z));
             }

@@ -2,9 +2,9 @@ using UnityEngine;
 
 namespace MongeArcano
 {
-    public enum TipoColetavel { Essencia, Erva, Chave, Nota }
+    public enum TipoColetavel { Essencia, Erva, Chave, Nota, Frasco }
 
-    /// <summary>Itens do mundo. Essência e Erva são coletadas ao encostar; chaves, sigilos e arquivos com [E].</summary>
+    /// <summary>Essência, ervas e frascos são coletados ao encostar; chaves e sigilos aproximam a câmera ao pegar; documentos abrem em tela de leitura.</summary>
     public class Coletavel : Interagivel
     {
         public TipoColetavel tipo;
@@ -16,6 +16,9 @@ namespace MongeArcano
 
         Vector3 basePos;
         float fase;
+        bool coletado;
+
+        public override bool Disponivel { get { return enabled && !coletado; } }
 
         public override string Rotulo
         {
@@ -26,6 +29,7 @@ namespace MongeArcano
                     case TipoColetavel.Chave: return "Pegar: " + GameManager.NomeChave(chaveId);
                     case TipoColetavel.Nota: return "Ler: " + titulo;
                     case TipoColetavel.Erva: return "Pegar Erva Sagrada";
+                    case TipoColetavel.Frasco: return "Pegar Frasco de Essência";
                     default: return "Pegar essência arcana";
                 }
             }
@@ -53,26 +57,45 @@ namespace MongeArcano
                     p.AddMana(valor);
                     gm.Mostrar("+ Essência arcana", 1.5f);
                     Som.Tocar(TipoSom.Coleta, transform.position, 0.8f);
+                    coletado = true;
                     Destroy(gameObject);
                     break;
 
                 case TipoColetavel.Erva:
                     if (p.ervas >= 9) return;
                     p.AddErva();
-                    gm.Mostrar("+ Erva Sagrada  (use com [H])", 2f);
+                    gm.Mostrar("+ Erva Sagrada  (tecla [1] ou [V])", 2f);
                     Som.Tocar(TipoSom.Coleta, transform.position, 0.8f);
+                    coletado = true;
+                    Destroy(gameObject);
+                    break;
+
+                case TipoColetavel.Frasco:
+                    if (p.frascos >= 9) return;
+                    p.AddFrasco();
+                    gm.Mostrar("+ Frasco de Essência  (tecla [2])", 2f);
+                    Som.Tocar(TipoSom.Coleta, transform.position, 0.8f);
+                    coletado = true;
                     Destroy(gameObject);
                     break;
 
                 case TipoColetavel.Chave:
-                    gm.DarChave(chaveId);
-                    Som.Tocar(TipoSom.Coleta, transform.position, 1f);
-                    Destroy(gameObject);
-                    break;
+                    {
+                        coletado = true;
+                        string id = chaveId;
+                        GameObject go = gameObject;
+                        Som.Tocar(TipoSom.Coleta, transform.position, 1f);
+                        gm.CenaItem(transform, GameManager.NomeChave(id), "Item chave obtido", () =>
+                        {
+                            gm.DarChave(id);
+                            Destroy(go);
+                        });
+                        break;
+                    }
 
                 case TipoColetavel.Nota:
                     Som.Tocar(TipoSom.Coleta, transform.position, 0.6f);
-                    gm.AbrirNota(titulo, texto);
+                    gm.AbrirNota(titulo, texto, transform);
                     break;
             }
         }

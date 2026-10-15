@@ -30,3 +30,7 @@ crashlytics-build.properties
 .DS_Store
 Thumbs.db
 # IMPORTANTE: não ignore *.meta nem a pasta docs/ (build WebGL publicado no GitHub Pages)
+
+# Modelos 3D de terceiros: confirmar licenca antes de publicar
+Assets/Modelos/
+Assets/Modelos.meta

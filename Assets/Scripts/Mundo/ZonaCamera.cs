@@ -3,13 +3,11 @@ using UnityEngine;
 
 namespace MongeArcano
 {
-    /// <summary>
-    /// Câmera fixa por sala (marca registrada do survival horror clássico).
-    /// Quando o jogador entra na zona, a câmera "corta" para o ângulo da sala e passa a girar acompanhando o monge.
-    /// </summary>
+    /// <summary>Câmera fixa por sala. Também avisa o sistema de missões quando o jogador entra na sala.</summary>
     [RequireComponent(typeof(BoxCollider))]
     public class ZonaCamera : MonoBehaviour
     {
+        public string nomeSala = "";
         public Vector3 posicaoCamera;
         public float campoDeVisao = 55f;
 
@@ -28,15 +26,14 @@ namespace MongeArcano
                 ZonaCamera z = todas[i];
                 if (z == null) continue;
                 BoxCollider c = z.GetComponent<BoxCollider>();
-                if (c != null && c.bounds.Contains(p))
+                if (c == null || !c.bounds.Contains(p)) continue;
+                if (z != atual)
                 {
-                    if (z != atual)
-                    {
-                        atual = z;
-                        if (CameraDirector.Instance != null) CameraDirector.Instance.Cortar(z.posicaoCamera, z.campoDeVisao);
-                    }
-                    return;
+                    atual = z;
+                    if (CameraDirector.Instance != null) CameraDirector.Instance.DefinirZona(z.posicaoCamera, z.campoDeVisao);
+                    if (GameManager.Instance != null && z.nomeSala.Length > 0) GameManager.Instance.Evento("sala", z.nomeSala);
                 }
+                return;
             }
         }
     }

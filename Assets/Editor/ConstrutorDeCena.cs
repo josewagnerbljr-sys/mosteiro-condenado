@@ -24,7 +24,18 @@ namespace MongeArcano.EditorTools
             if (!AssetDatabase.IsValidFolder("Assets/Scenes")) AssetDatabase.CreateFolder("Assets", "Scenes");
 
             var cena = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            ConstrutorMundo.Construir();
+            Modelos.ProvedorEditor = nome =>
+            {
+                string[] guids = AssetDatabase.FindAssets(nome + " t:GameObject", new[] { "Assets/Modelos" });
+                for (int i = 0; i < guids.Length; i++)
+                {
+                    string caminho = AssetDatabase.GUIDToAssetPath(guids[i]);
+                    if (System.IO.Path.GetFileNameWithoutExtension(caminho) == nome) return AssetDatabase.LoadAssetAtPath<GameObject>(caminho);
+                }
+                return null;
+            };
+            try { ConstrutorMundo.Construir(); }
+            finally { Modelos.ProvedorEditor = null; Modelos.Registro = null; }
             EditorSceneManager.SaveScene(cena, CaminhoCena);
             ConfigurarProjeto();
             AssetDatabase.SaveAssets();

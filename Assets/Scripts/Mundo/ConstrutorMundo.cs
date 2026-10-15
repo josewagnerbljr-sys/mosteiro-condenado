@@ -8,7 +8,7 @@ namespace MongeArcano
     /// no editor e salva a cena (assim você pode editar tudo visualmente depois).
     /// Todas as coordenadas são do mundo (o objeto "Mundo" fica na origem).
     /// </summary>
-    public static class ConstrutorMundo
+    public static partial class ConstrutorMundo
     {
         const float AltParede = 4.5f;
         const float Esp = 0.5f;
@@ -49,6 +49,9 @@ namespace MongeArcano
         {
             GameObject raiz = new GameObject("Mundo");
             Transform rt = raiz.transform;
+            GameObject regGo = new GameObject("ModelosRegistro");
+            regGo.transform.SetParent(rt, false);
+            Modelos.Registro = regGo.AddComponent<ModelosRegistro>();
             tEst = Filho(rt, "Estrutura");
             tPortas = Filho(rt, "Portas");
             tProps = Filho(rt, "Cenario");
@@ -68,14 +71,19 @@ namespace MongeArcano
             Corredor("Corredor_Salao_Biblioteca", new Vector3(8f, 0f, 0f), true);
             Corredor("Corredor_Salao_Catacumbas", new Vector3(0f, 0f, 8f), false);
             Corredor("Corredor_Catacumbas_Santuario", new Vector3(0f, 0f, 24f), false);
+            Corredor("Corredor_Entrada", new Vector3(0f, 0f, -8f), false);
 
             CriarPorta("Portao_Capela", new Vector3(-8f, 0f, 0f), true, new string[0], "");
             CriarPorta("Portao_Biblioteca", new Vector3(8f, 0f, 0f), true, new string[] { "ferro" }, "porta_biblioteca");
             CriarPorta("Portao_Catacumbas", new Vector3(0f, 0f, 8f), false, new string[] { "osso" }, "porta_catacumbas");
+            CriarPorta("Portao_Principal", new Vector3(0f, 0f, -8f), false, new string[0], "porta_principal");
             CriarPorta("Portao_Santuario", new Vector3(0f, 0f, 24f), false, new string[] { "sigilo_lua", "sigilo_fogo", "sigilo_terra" }, "porta_santuario");
 
+            Exterior();
+            DecoracaoInterior();
+
             GameObject portal = CriarPortal(new Vector3(0f, 0f, 34f));
-            PlayerController jogador = ProceduralModels.CriarJogador(new Vector3(0f, 0.05f, -4.2f), 0f);
+            PlayerController jogador = ProceduralModels.CriarJogador(new Vector3(0f, 0.05f, -72f), 0f);
             CriarCamera(jogador.transform);
 
             GameObject g = new GameObject("Gerenciador de Jogo");
@@ -83,6 +91,7 @@ namespace MongeArcano
             gm.jogador = jogador;
             gm.portalFinal = portal;
             g.AddComponent<GameUI>();
+            g.AddComponent<MusicaDinamica>();
 
             return raiz;
         }
@@ -91,11 +100,13 @@ namespace MongeArcano
         static void ConfigurarAmbiente()
         {
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.12f, 0.12f, 0.18f);
+            RenderSettings.ambientLight = new Color(0.11f, 0.11f, 0.16f);
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
-            RenderSettings.fogColor = new Color(0.02f, 0.02f, 0.04f);
-            RenderSettings.fogDensity = 0.022f;
+            RenderSettings.fogColor = new Color(0.07f, 0.045f, 0.06f);
+            RenderSettings.fogDensity = 0.016f;
+            Material ceu = ProceduralModels.Mat("CeuTrevas");
+            if (ceu != null && ceu.shader != null && ceu.shader.name.StartsWith("Skybox")) RenderSettings.skybox = ceu;
         }
 
         static void CriarCamera(Transform alvo)
@@ -103,7 +114,7 @@ namespace MongeArcano
             GameObject go = new GameObject("Camera Principal");
             go.tag = "MainCamera";
             Camera cam = go.AddComponent<Camera>();
-            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.clearFlags = RenderSettings.skybox != null ? CameraClearFlags.Skybox : CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.01f, 0.01f, 0.02f);
             cam.fieldOfView = 52f;
             cam.nearClipPlane = 0.1f;
@@ -125,7 +136,9 @@ namespace MongeArcano
 
         static GameObject Cubo(Transform pai, string nome, Vector3 pos, Vector3 esc, string mat)
         {
-            return ProceduralModels.Prim(PrimitiveType.Cube, pai, nome, pos, esc, mat, true);
+            GameObject g = ProceduralModels.Prim(PrimitiveType.Cube, pai, nome, pos, esc, mat, true);
+            if (nome.StartsWith("Parede") || nome.StartsWith("Muro") || nome.StartsWith("Fachada")) g.AddComponent<ParedeOcultavel>();
+            return g;
         }
 
         static Coletavel Item(TipoColetavel tipo, Vector3 pos, string id, string titulo, string texto)
@@ -153,6 +166,7 @@ namespace MongeArcano
             bc.isTrigger = true;
             bc.size = new Vector3(tam - 0.2f, 8f, tam - 0.2f);
             ZonaCamera z = go.AddComponent<ZonaCamera>();
+            z.nomeSala = nome;
             z.posicaoCamera = centro + offsetCam;
             z.campoDeVisao = fov;
         }
@@ -331,7 +345,7 @@ namespace MongeArcano
         static void Salao()
         {
             Vector3 c = Vector3.zero;
-            Sala("Salao", c, 12f, Lado.N | Lado.E | Lado.W);
+            Sala("Salao", c, 12f, Lado.N | Lado.E | Lado.W | Lado.S);
             Zona("Salao", c, 12f, new Vector3(-5.2f, 6.8f, -5.4f), 52f);
             LuzSala(c, new Color(0.55f, 0.65f, 1f), 0.8f);
 
@@ -339,11 +353,6 @@ namespace MongeArcano
             Pilar(-3.8f, -3.2f); Pilar(3.8f, -3.2f); Pilar(-3.8f, 3.8f); Pilar(3.8f, 3.8f);
             Tocha(new Vector3(-5.7f, 2.2f, -3f)); Tocha(new Vector3(5.7f, 2.2f, -3f));
             Tocha(new Vector3(-2.4f, 2.2f, 5.7f)); Tocha(new Vector3(2.4f, 2.2f, 5.7f));
-
-            // portão principal selado (sul)
-            Cubo(tEst, "PortaoSelado", new Vector3(0f, 2f, -5.85f), new Vector3(4f, 4f, 0.3f), "Obsidiana");
-            for (int i = -1; i <= 1; i++)
-                ProceduralModels.Prim(PrimitiveType.Cube, tEst, "RunaPortao" + i, new Vector3(i * 1f, 2f, -5.68f), new Vector3(0.12f, 2.6f, 0.05f), "EmissaoRoxa");
 
             Pedestal(-4.8f, 3f);
             Item(TipoColetavel.Nota, new Vector3(-4.8f, 1.1f, 3f), "", "Diário do Abade", NotaSalao);
@@ -377,6 +386,7 @@ namespace MongeArcano
             Item(TipoColetavel.Nota, new Vector3(-12f, 1.1f, -4.9f), "", "Oração Rasgada", NotaCapela);
 
             Essencia(-14f, 2f); Essencia(-19f, -4.8f);
+            Item(TipoColetavel.Frasco, new Vector3(-17f, 0.6f, -1f), "", "", "");
 
             Mob(TipoInimigo.Espectro, -19.5f, 0.05f, 3f, 90f);
             Mob(TipoInimigo.Espectro, -19f, 0.05f, -3.2f, 90f);
@@ -434,6 +444,7 @@ namespace MongeArcano
 
             Essencia(-5f, 11.5f); Essencia(5f, 11.5f); Essencia(0f, 12f);
             Erva(5.2f, 15f);
+            Item(TipoColetavel.Frasco, new Vector3(0f, 0.6f, 17f), "", "", "");
 
             Mob(TipoInimigo.Infernal, -2.5f, 0.05f, 19.5f, 180f);
             Mob(TipoInimigo.Infernal, 2.5f, 0.05f, 18.5f, 180f);
