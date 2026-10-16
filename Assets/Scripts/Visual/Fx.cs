@@ -129,9 +129,9 @@ namespace MongeArcano
             GameObject go = new GameObject("FxFaiscas");
             go.transform.position = pos;
             ParticleSystem ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             ParticleSystem.MainModule main = ps.main;
             main.loop = false;
-            main.duration = 0.5f;
             main.startLifetime = new ParticleSystem.MinMaxCurve(vida * 0.6f, vida);
             main.startSpeed = new ParticleSystem.MinMaxCurve(vel * 0.4f, vel);
             main.startSize = new ParticleSystem.MinMaxCurve(tamanho * 0.5f, tamanho);
@@ -162,6 +162,7 @@ namespace MongeArcano
             GameObject go = new GameObject("FxRastroFaiscas");
             go.transform.SetParent(pai, false);
             ParticleSystem ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             ParticleSystem.MainModule main = ps.main;
             main.loop = true;
             main.startLifetime = new ParticleSystem.MinMaxCurve(0.35f, 0.6f);
@@ -181,6 +182,7 @@ namespace MongeArcano
             sz.enabled = true;
             sz.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0f)));
             go.GetComponent<ParticleSystemRenderer>().sharedMaterial = Aditivo();
+            ps.Play();
         }
 
         public static void Rastro(GameObject go, Color cor, float largura)
@@ -201,6 +203,7 @@ namespace MongeArcano
             go.transform.SetParent(pai, false);
             go.transform.position = centro;
             ParticleSystem ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             ParticleSystem.MainModule main = ps.main;
             main.loop = true;
             main.prewarm = true;
@@ -220,6 +223,7 @@ namespace MongeArcano
             cl.enabled = true;
             cl.color = new ParticleSystem.MinMaxGradient(Desvanecer(cor));
             go.GetComponent<ParticleSystemRenderer>().sharedMaterial = Aditivo();
+            ps.Play();
         }
     }
 }
