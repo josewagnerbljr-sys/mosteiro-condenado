@@ -72,6 +72,7 @@ namespace MongeArcano
             Corredor("Corredor_Salao_Catacumbas", new Vector3(0f, 0f, 8f), false);
             Corredor("Corredor_Catacumbas_Santuario", new Vector3(0f, 0f, 24f), false);
             Corredor("Corredor_Entrada", new Vector3(0f, 0f, -8f), false);
+            Corredor("Corredor_Biblioteca_Torre", new Vector3(24f, 0f, 0f), true);
 
             CriarPorta("Portao_Capela", new Vector3(-8f, 0f, 0f), true, new string[0], "");
             CriarPorta("Portao_Biblioteca", new Vector3(8f, 0f, 0f), true, new string[] { "ferro" }, "porta_biblioteca");
@@ -81,6 +82,10 @@ namespace MongeArcano
 
             Exterior();
             DecoracaoInterior();
+            Estilo();
+            Torre();
+            Secreta();
+            Masmorra();
 
             GameObject portal = CriarPortal(new Vector3(0f, 0f, 34f));
             PlayerController jogador = ProceduralModels.CriarJogador(new Vector3(0f, 0.05f, -72f), 0f);
@@ -91,6 +96,7 @@ namespace MongeArcano
             gm.jogador = jogador;
             gm.portalFinal = portal;
             g.AddComponent<GameUI>();
+            g.AddComponent<InventarioUI>();
             g.AddComponent<MusicaDinamica>();
 
             return raiz;
@@ -105,7 +111,8 @@ namespace MongeArcano
             RenderSettings.fogMode = FogMode.ExponentialSquared;
             RenderSettings.fogColor = new Color(0.07f, 0.045f, 0.06f);
             RenderSettings.fogDensity = 0.016f;
-            Material ceu = ProceduralModels.Mat("CeuTrevas");
+            Material ceu = ProceduralModels.Mat("CeuPanoramico");
+            if (ceu == null || ceu.shader == null || !ceu.shader.name.StartsWith("Skybox")) ceu = ProceduralModels.Mat("CeuTrevas");
             if (ceu != null && ceu.shader != null && ceu.shader.name.StartsWith("Skybox")) RenderSettings.skybox = ceu;
         }
 
@@ -120,6 +127,7 @@ namespace MongeArcano
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 90f;
             go.AddComponent<AudioListener>();
+            go.AddComponent<Cinema>();
             CameraDirector d = go.AddComponent<CameraDirector>();
             d.alvo = alvo;
             go.transform.position = new Vector3(-5.2f, 6.8f, -5.4f);
@@ -225,7 +233,7 @@ namespace MongeArcano
             Tocha(centro + (aoLongoDeX ? new Vector3(0f, 2.2f, lado - 0.2f) : new Vector3(lado - 0.2f, 2.2f, 0f)));
         }
 
-        static void CriarPorta(string nome, Vector3 pos, bool aoLongoDeX, string[] chaves, string marco)
+        static Porta CriarPorta(string nome, Vector3 pos, bool aoLongoDeX, string[] chaves, string marco)
         {
             Transform t = Filho(tPortas, nome);
             t.position = pos;
@@ -243,6 +251,7 @@ namespace MongeArcano
             p.chavesExigidas = chaves;
             p.marco = marco;
             p.deslocamento = new Vector3(0f, -3.6f, 0f);
+            return p;
         }
 
         static GameObject CriarPortal(Vector3 pos)
@@ -368,7 +377,7 @@ namespace MongeArcano
         static void Capela()
         {
             Vector3 c = new Vector3(-16f, 0f, 0f);
-            Sala("Capela", c, 12f, Lado.E);
+            Sala("Capela", c, 12f, Lado.E | Lado.S);
             Zona("Capela", c, 12f, new Vector3(5.2f, 6.8f, -5.4f), 55f);
             LuzSala(c, new Color(0.45f, 0.55f, 1f), 0.7f);
 
@@ -396,7 +405,7 @@ namespace MongeArcano
         static void Biblioteca()
         {
             Vector3 c = new Vector3(16f, 0f, 0f);
-            Sala("Biblioteca", c, 12f, Lado.W);
+            Sala("Biblioteca", c, 12f, Lado.W | Lado.E);
             Zona("Biblioteca", c, 12f, new Vector3(5.2f, 6.8f, 5.4f), 55f);
             LuzSala(c, new Color(1f, 0.75f, 0.5f), 0.7f);
 

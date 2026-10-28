@@ -12,6 +12,8 @@ namespace MongeArcano
         public float empurrao = 5f;
         public float duracao = 3.5f;
         public string efeitoMaterial = "EmissaoAzul";
+        public Inimigo alvo;
+        public float giroMaximo = 220f;
 
         Rigidbody rb;
         Vector3 ultimaDir = Vector3.forward;
@@ -32,7 +34,15 @@ namespace MongeArcano
 
         void FixedUpdate()
         {
-            if (rb != null && rb.GetVel().sqrMagnitude > 1f) ultimaDir = rb.GetVel().normalized;
+            if (rb == null) return;
+            if (alvo != null && !alvo.Morto && amigavel)
+            {
+                Vector3 desejado = (alvo.PontoMira - transform.position).normalized;
+                Vector3 nova = Vector3.RotateTowards(rb.GetVel().normalized, desejado, giroMaximo * Mathf.Deg2Rad * Time.fixedDeltaTime, 0f);
+                rb.SetVel(nova * velocidade);
+                transform.forward = nova;
+            }
+            if (rb.GetVel().sqrMagnitude > 1f) ultimaDir = rb.GetVel().normalized;
         }
 
         void OnCollisionEnter(Collision c)

@@ -133,6 +133,17 @@ namespace MongeArcano
             an.rolagem = 2f;
             an.passos = true;
 
+            RigAnimador rigJ = RigAnimador.Montar(raiz, malhaMonge);
+            if (rigJ != null)
+            {
+                an.rig = rigJ;
+                an.estilo = 0.35f;
+                rigJ.roupao = true;
+                rigJ.ampBracos = 22f;
+                rigJ.frequencia = 8.5f;
+                rigJ.ampTronco = 8f;
+            }
+
             PlayerController pc = raiz.AddComponent<PlayerController>();
             pc.escudoVisual = escudo;
             pc.anim = an;
@@ -184,6 +195,13 @@ namespace MongeArcano
             }
 
             GameObject malha = Modelos.Instanciar(nomeModelo, m, altura, 0f, pintura);
+            RigAnimador rig = RigAnimador.Montar(go, malha);
+            if (rig != null)
+            {
+                an.rig = rig;
+                an.estilo = 0.35f;
+                ParametrosRig(rig, tipo);
+            }
             if (malha == null)
             {
                 // sem o modelo importado: usa as formas simples do protótipo
@@ -261,8 +279,26 @@ namespace MongeArcano
                     an.frequencia = 3.5f; an.inclinacao = 5f; an.balancoCorpo = 0.08f;
                     break;
             }
+            if (ini.xp > 40f) ini.chanceItem = 0.5f;
+            if (tipo == TipoInimigo.BruxaCinza || tipo == TipoInimigo.BruxaNegra || tipo == TipoInimigo.BruxaVermelha) ini.chanceItem = 0.55f;
             ini.vida = ini.vidaMax;
             return ini;
+        }
+
+        static void ParametrosRig(RigAnimador r, TipoInimigo tipo)
+        {
+            switch (tipo)
+            {
+                case TipoInimigo.Possuido: r.roupao = true; r.ampBracos = 30f; r.frequencia = 5.5f; break;
+                case TipoInimigo.Infernal: r.ampPernas = 26f; r.ampBracos = 26f; r.frequencia = 6.5f; break;
+                case TipoInimigo.Arconte: r.roupao = true; r.ampBracos = 16f; r.frequencia = 4.2f; break;
+                case TipoInimigo.Esqueleto: r.ampPernas = 24f; r.ampBracos = 26f; r.frequencia = 8f; break;
+                case TipoInimigo.Armadura: r.ampPernas = 26f; r.ampBracos = 22f; r.frequencia = 6f; break;
+                case TipoInimigo.BruxaVermelha:
+                case TipoInimigo.BruxaNegra:
+                case TipoInimigo.BruxaCinza: r.roupao = true; r.ampBracos = 20f; r.frequencia = 6f; break;
+                default: r.ampPernas = 24f; r.ampBracos = 22f; r.frequencia = 5.5f; break;
+            }
         }
 
         static void ConstruirPossuido(Transform t)
@@ -420,6 +456,11 @@ namespace MongeArcano
         // ============================================================ PROJÉTEIS
         public static Projetil CriarProjetil(Vector3 pos, Vector3 dir, bool amigavel, float dano, float vel, Collider ignorar)
         {
+            return CriarProjetil(pos, dir, amigavel, dano, vel, ignorar, null);
+        }
+
+        public static Projetil CriarProjetil(Vector3 pos, Vector3 dir, bool amigavel, float dano, float vel, Collider ignorar, Inimigo alvo)
+        {
             GameObject go = new GameObject(amigavel ? "RaioArcano" : "BolaInfernal");
             go.transform.position = pos;
             string mat = amigavel ? "EmissaoAzul" : "EmissaoVermelha";
@@ -444,6 +485,7 @@ namespace MongeArcano
             p.dano = dano;
             p.velocidade = vel;
             p.efeitoMaterial = mat;
+            p.alvo = alvo;
             if (ignorar != null) Physics.IgnoreCollision(sc, ignorar);
             p.Lancar(dir);
             return p;

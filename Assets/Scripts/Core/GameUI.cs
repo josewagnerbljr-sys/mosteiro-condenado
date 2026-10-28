@@ -85,13 +85,14 @@ namespace MongeArcano
 
             float W = Screen.width, H = Screen.height;
 
-            if (gm.Estado != EstadoJogo.Titulo)
+            if (gm.Estado != EstadoJogo.Titulo && gm.Estado != EstadoJogo.Inventario)
             {
                 DesenharHUD(gm, W, H);
                 Hotbar(gm, W, H);
                 BarraMagias(gm, W, H);
                 Missoes(gm, W, H);
                 BannerUI(gm, W, H);
+                if (gm.Estado == EstadoJogo.Jogando) Mira(gm, W, H);
             }
 
             if (gm.Estado == EstadoJogo.Cinematica || gm.Estado == EstadoJogo.Lendo) Faixas(gm, W, H);
@@ -259,6 +260,30 @@ namespace MongeArcano
             }
         }
 
+        void Mira(GameManager gm, float W, float H)
+        {
+            float cx = W * 0.5f, cy = H * 0.5f;
+            Color c = new Color(1f, 1f, 1f, 0.55f);
+            Retangulo(new Rect(cx - 1f * s, cy - 8f * s, 2f * s, 6f * s), c);
+            Retangulo(new Rect(cx - 1f * s, cy + 2f * s, 2f * s, 6f * s), c);
+            Retangulo(new Rect(cx - 8f * s, cy - 1f * s, 6f * s, 2f * s), c);
+            Retangulo(new Rect(cx + 2f * s, cy - 1f * s, 6f * s, 2f * s), c);
+
+            Inimigo alvo = gm.jogador.AlvoTravado;
+            Camera cam = Camera.main;
+            if (alvo == null || cam == null) return;
+            Vector3 sp = cam.WorldToScreenPoint(alvo.PontoMira);
+            if (sp.z <= 0f) return;
+            float x = sp.x, y = H - sp.y, r = 26f * s;
+            Color v = new Color(1f, 0.25f, 0.2f, 0.9f);
+            float t = 3f * s;
+            Retangulo(new Rect(x - r, y - r, r * 0.6f, t), v); Retangulo(new Rect(x - r, y - r, t, r * 0.6f), v);
+            Retangulo(new Rect(x + r - r * 0.6f, y - r, r * 0.6f, t), v); Retangulo(new Rect(x + r - t, y - r, t, r * 0.6f), v);
+            Retangulo(new Rect(x - r, y + r - t, r * 0.6f, t), v); Retangulo(new Rect(x - r, y + r - r * 0.6f, t, r * 0.6f), v);
+            Retangulo(new Rect(x + r - r * 0.6f, y + r - t, r * 0.6f, t), v); Retangulo(new Rect(x + r - t, y + r - r * 0.6f, t, r * 0.6f), v);
+            Barra(new Rect(x - 40f * s, y - r - 14f * s, 80f * s, 6f * s), alvo.FracaoVida, new Color(0.85f, 0.15f, 0.15f));
+        }
+
         void BannerUI(GameManager gm, float W, float H)
         {
             float restante = gm.BannerAte - Time.unscaledTime;
@@ -286,10 +311,10 @@ namespace MongeArcano
             Rotulo(new Rect(0f, H * 0.08f, W, 90f * s), "MONGE ARCANO", titulo, new Color(1f, 0.75f, 0.25f));
             Rotulo(new Rect(0f, H * 0.08f + 80f * s, W, 50f * s), "O MOSTEIRO CONDENADO", grande, new Color(0.85f, 0.2f, 0.2f));
             string ajuda =
-                "W A S D: mover (relativo à câmera)     SHIFT: correr     T: alternar para controle de tanque\n" +
-                "ESPAÇO: Raio Arcano   F: Nova Sagrada   G: Leque Arcano   B: Escudo Místico   R: Invocação Celeste (Poder Arcano cheio)\n" +
-                "C: coletar / interagir / ler     V: curar     X: golpe de cajado     1 a 6: atalhos de itens\n" +
-                "TAB ou P: pausa e inventário (na pausa, arraste as barras de atalhos e magias para onde preferir)";
+                "W A S D: mover (relativo à câmera)     SHIFT: correr     Botão direito + mouse: girar a câmera     Roda: zoom     Y: câmera fixa\n" +
+                "ESPAÇO / clique: Raio Arcano (mira no alvo ou no centro da tela)     Z ou botão do meio: travar/destravar alvo\n" +
+                "F: Nova Sagrada   G: Leque Arcano   B: Escudo Místico   R: Invocação Celeste (Poder Arcano cheio)\n" +
+                "C: coletar / interagir / ler     V: curar     X: golpe de cajado     1 a 6: atalhos de itens     I: inventário e habilidades     TAB: pausa";
             GUI.Label(new Rect(W * 0.1f, H * 0.36f, W * 0.8f, 220f * s), ajuda, centro);
             float pulso = 0.6f + 0.4f * Mathf.Sin(Time.unscaledTime * 3f);
             Rotulo(new Rect(0f, H * 0.78f, W, 40f * s), "Pressione ENTER para começar", normal, new Color(1f, 1f, 1f, pulso));

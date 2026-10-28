@@ -86,6 +86,10 @@ namespace MongeArcano
                 .Obj("Magias lançadas", "magia", "*", 25));
             l.Add(new Missao("s4", "Fôlego Sagrado", "Use ervas para se curar.", 60, false)
                 .Obj("Ervas usadas", "erva", "", 3));
+            l.Add(new Missao("s5", "Caçador de Tesouros", "Abra baús espalhados pelo mosteiro.", 140, false)
+                .Obj("Baús abertos", "bau", "", 4));
+            l.Add(new Missao("s6", "Eco da Masmorra", "Conclua a masmorra de ondas pelo portal do cemitério.", 220, false)
+                .Obj("Masmorra concluída", "arena", ""));
             return l;
         }
     }

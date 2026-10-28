@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace MongeArcano
 {
-    public enum EstadoJogo { Titulo, Jogando, Pausado, Lendo, Cinematica, FimDeJogo, Vitoria }
+    public enum EstadoJogo { Titulo, Jogando, Pausado, Lendo, Cinematica, Inventario, FimDeJogo, Vitoria }
 
     public struct SlotInfo
     {
@@ -97,6 +97,18 @@ namespace MongeArcano
                         Estado = EstadoJogo.Pausado;
                         Time.timeScale = 0f;
                     }
+                    else if (Input.GetKeyDown(KeyCode.I))
+                    {
+                        Estado = EstadoJogo.Inventario;
+                        Time.timeScale = 0f;
+                    }
+                    break;
+                case EstadoJogo.Inventario:
+                    if (Input.GetKeyDown(KeyCode.I) || Input.GetKeyDown(KeyCode.Escape))
+                    {
+                        Estado = EstadoJogo.Jogando;
+                        Time.timeScale = 1f;
+                    }
                     break;
                 case EstadoJogo.Pausado:
                     if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown(KeyCode.Tab) || Enter())
@@ -121,10 +133,30 @@ namespace MongeArcano
 
         void Iniciar()
         {
-            Estado = EstadoJogo.Jogando;
-            Time.timeScale = 1f;
             MusicaDinamica m = GetComponent<MusicaDinamica>();
             if (m != null) m.Iniciar();
+            CameraDirector cd = CameraDirector.Instance;
+            if (cd == null || jogador == null) { ComecarJogo(); return; }
+
+            Estado = EstadoJogo.Cinematica;
+            Time.timeScale = 1f;
+            TituloCena = "MOSTEIRO CONDENADO";
+            SubtituloCena = "O Monge Arcano   -   [ENTER] pula";
+            Vector3 p = jogador.transform.position;
+            Vector3 fim = p - jogador.transform.forward * 6.5f + Vector3.up * 3.2f;
+            cd.IniciarVoo(
+                new Vector3[] { new Vector3(-34f, 34f, -96f), new Vector3(-6f, 17f, -84f), new Vector3(26f, 9f, -76f), fim },
+                new Vector3[] { new Vector3(0f, 8f, 60f), new Vector3(0f, 5f, -20f), p + Vector3.up * 1.5f, p + Vector3.up * 1.6f },
+                11f, ComecarJogo);
+        }
+
+        void ComecarJogo()
+        {
+            TituloCena = "";
+            SubtituloCena = "";
+            Estado = EstadoJogo.Jogando;
+            Time.timeScale = 1f;
+            if (CameraDirector.Instance != null && jogador != null) CameraDirector.Instance.giro = jogador.transform.eulerAngles.y;
             Mostrar("Mosteiro de Névoa Negra. Algo respira nas sombras...", 4f);
         }
 
@@ -236,9 +268,10 @@ namespace MongeArcano
             lista.Clear();
             lista.Add(new SlotInfo { icone = "erva", nome = "Erva Sagrada", qtd = jogador.ervas, usavel = true });
             lista.Add(new SlotInfo { icone = "frasco", nome = "Frasco de Essência", qtd = jogador.frascos, usavel = true });
+            List<Item> pocoes = jogador.Pocoes();
             for (int i = 0; i < 4; i++)
             {
-                if (i < ChavesOrdem.Count) lista.Add(new SlotInfo { icone = ChavesOrdem[i], nome = NomeChave(ChavesOrdem[i]), qtd = 1, usavel = false });
+                if (i < pocoes.Count) lista.Add(new SlotInfo { icone = pocoes[i].mana > 0f && pocoes[i].vida <= 0f ? "frasco" : "erva", nome = pocoes[i].nome, qtd = 1, usavel = true });
                 else lista.Add(new SlotInfo { icone = "", nome = "", qtd = 0, usavel = false });
             }
         }

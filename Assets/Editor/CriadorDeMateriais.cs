@@ -53,8 +53,84 @@ namespace MongeArcano.EditorTools
             AssetDatabase.Refresh();
         }
 
+        static Texture2D Tex(string nome)
+        {
+            string caminho = "Assets/Texturas/" + nome + ".png";
+            if (!System.IO.File.Exists(caminho)) return null;
+            AssetDatabase.ImportAsset(caminho);
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(caminho);
+        }
+
+        static void Textura(string material, string textura, Vector2 repeticao, Color cor)
+        {
+            Material m = AssetDatabase.LoadAssetAtPath<Material>(Pasta + "/" + material + ".mat");
+            Texture2D t = Tex(textura);
+            if (m == null || t == null) return;
+            m.mainTexture = t;
+            m.mainTextureScale = repeticao;
+            m.color = cor;
+            EditorUtility.SetDirty(m);
+        }
+
         static void Especiais()
         {
+            AssetDatabase.Refresh();
+            Textura("Terra", "tex_terra", new Vector2(26f, 26f), Color.white);
+            Textura("Caminho", "tex_caminho", new Vector2(1f, 18f), Color.white);
+            Textura("Pedra", "tex_pedra", new Vector2(3f, 2f), Color.white);
+            Textura("PedraMusgo", "tex_musgo", new Vector2(3f, 2f), Color.white);
+            Textura("Piso", "tex_piso", new Vector2(3f, 3f), Color.white);
+
+            string p0 = Pasta + "/Capim.mat";
+            if (AssetDatabase.LoadAssetAtPath<Material>(p0) == null)
+            {
+                Texture2D tc = Tex("tex_capim");
+                string caminhoCapim = "Assets/Texturas/tex_capim.png";
+                TextureImporter ti = AssetImporter.GetAtPath(caminhoCapim) as TextureImporter;
+                if (ti != null && !ti.alphaIsTransparency) { ti.alphaIsTransparency = true; ti.SaveAndReimport(); }
+                Material m = new Material(Shader.Find("Standard"));
+                m.SetFloat("_Mode", 1f);
+                m.SetFloat("_Cutoff", 0.4f);
+                m.EnableKeyword("_ALPHATEST_ON");
+                m.renderQueue = 2450;
+                m.SetFloat("_Glossiness", 0f);
+                if (tc != null) m.mainTexture = tc;
+                m.color = new Color(0.62f, 0.55f, 0.38f);
+                AssetDatabase.CreateAsset(m, p0);
+            }
+            p0 = Pasta + "/NevoaPlano.mat";
+            if (AssetDatabase.LoadAssetAtPath<Material>(p0) == null)
+            {
+                Shader sh = Shader.Find("Legacy Shaders/Particles/Alpha Blended");
+                if (sh == null) sh = Shader.Find("Particles/Standard Unlit");
+                Material m = new Material(sh);
+                Texture2D tn = Tex("tex_nevoa");
+                if (tn != null) m.mainTexture = tn;
+                m.mainTextureScale = new Vector2(2.5f, 2.5f);
+                if (m.HasProperty("_TintColor")) m.SetColor("_TintColor", new Color(0.55f, 0.48f, 0.55f, 0.30f));
+                AssetDatabase.CreateAsset(m, p0);
+            }
+            p0 = Pasta + "/CeuPanoramico.mat";
+            if (AssetDatabase.LoadAssetAtPath<Material>(p0) == null)
+            {
+                Shader sh = Shader.Find("Skybox/Panoramic");
+                Texture2D ts = Tex("ceu_panoramico");
+                if (sh != null && ts != null)
+                {
+                    Material m = new Material(sh);
+                    m.SetTexture("_MainTex", ts);
+                    m.SetFloat("_Exposure", 1.05f);
+                    m.SetColor("_Tint", new Color(0.55f, 0.55f, 0.55f, 0.5f));
+                    AssetDatabase.CreateAsset(m, p0);
+                }
+            }
+            p0 = Pasta + "/CinemaMat.mat";
+            if (AssetDatabase.LoadAssetAtPath<Material>(p0) == null)
+            {
+                Shader sh = Shader.Find("Hidden/MongeArcano/Cinema");
+                if (sh != null) AssetDatabase.CreateAsset(new Material(sh), p0);
+            }
+
             string p = Pasta + "/FxAditivo.mat";
             if (AssetDatabase.LoadAssetAtPath<Material>(p) == null)
             {

@@ -12,12 +12,13 @@ namespace MongeArcano
         public string marco = "";
         public Transform painel;
         public Vector3 deslocamento = new Vector3(0f, -3.6f, 0f);
+        public string rotuloCustom = "";
 
         bool aberta;
 
         public override string Rotulo
         {
-            get { return chavesExigidas.Length == 0 ? "Abrir portão" : "Abrir portão (trancado)"; }
+            get { if (rotuloCustom.Length > 0) return rotuloCustom; return chavesExigidas.Length == 0 ? "Abrir portão" : "Abrir portão (trancado)"; }
         }
 
         public override bool Disponivel { get { return enabled && !aberta; } }

@@ -25,6 +25,7 @@ namespace MongeArcano
         public float deteccao = 8f;
         public float intervaloAtaque = 1.4f;
         public float chanceDrop = 0.3f;
+        public float chanceItem = 0.25f;
         public bool flutua;
         public float alturaFlutuar = 0.7f;
         public bool chefe;
@@ -83,6 +84,7 @@ namespace MongeArcano
         void FixedUpdate()
         {
             if (morto || rb == null || jogador == null) return;
+            if (GameManager.Instance != null && GameManager.Instance.Estado == EstadoJogo.Cinematica) return;
 
             Vector3 para = jogador.transform.position - transform.position;
             Vector3 plano = new Vector3(para.x, 0f, para.z);
@@ -278,6 +280,13 @@ namespace MongeArcano
                 ProceduralModels.CriarColetavel(t, new Vector3(p.x, 0.7f, p.z));
             }
 
+            if (Random.value < chanceItem || chefe)
+            {
+                System.Random rr = new System.Random(Time.frameCount + (int)(transform.position.x * 97f));
+                int qtd = chefe ? 3 : 1;
+                for (int q = 0; q < qtd; q++)
+                    Drops.Soltar(new Vector3(transform.position.x + q * 1.1f - (qtd - 1) * 0.55f, 0f, transform.position.z + 0.8f), gm.jogador.nivel, rr, chefe ? 0.3f : (xp > 40f ? 0.12f : 0f));
+            }
             if (chefe) gm.ChefeDerrotado();
             StartCoroutine(Desabar());
         }

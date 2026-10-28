@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MongeArcano
 {
-    public enum TipoSom { Disparo, Impacto, Golpe, Explosao, Dano, Morte, Coleta, Porta, Trancada, Vazio, Altar, Grunhido, Cura, Nova, Leque, Escudo, Super, LevelUp, Missao, Bau, Passo, Encanto, Grito }
+    public enum TipoSom { Disparo, Impacto, Golpe, Explosao, Dano, Morte, Coleta, Porta, Trancada, Vazio, Altar, Grunhido, Cura, Nova, Leque, Escudo, Super, LevelUp, Missao, Bau, Passo, Encanto, Grito, Trovao }
 
     /// <summary>
     /// Áudio 100% procedural: nenhum arquivo de som é necessário (zero risco de direitos autorais e build WebGL leve).
@@ -142,6 +142,8 @@ namespace MongeArcano
                         float env = Mathf.Sin(Mathf.Clamp01(local) * Mathf.PI) * (1f - p * 0.3f);
                         return (v * 0.12f + Ruido() * 0.03f) * env;
                     });
+                case TipoSom.Trovao:
+                    return Sintetizar("trovao", 3.2f, (t, p) => (Ruido() * 0.55f * Mathf.Exp(-t * 1.1f) + Mathf.Sin(2f * Mathf.PI * (38f + 10f * Mathf.Sin(t * 3f)) * t) * 0.7f) * Mathf.Min(1f, t / 0.15f) * Mathf.Exp(-t * 0.9f));
                 case TipoSom.Grito:
                     return Sintetizar("grito", 1.1f, (t, p) => (Varredura(t, 1.1f, 320f, 90f) * 0.45f + Ruido() * 0.35f * (1f - p)) * Mathf.Sin(Mathf.Clamp01(p * 1.15f) * Mathf.PI) * 0.8f);
                 default:

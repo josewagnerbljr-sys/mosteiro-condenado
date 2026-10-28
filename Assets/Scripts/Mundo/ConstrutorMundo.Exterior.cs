@@ -118,7 +118,6 @@ namespace MongeArcano
             Modelos.Liberar(arvores);
 
             // casal esquelético dançando valsa sombria entre os túmulos
-            var danc = Modelos.Variantes("dancarinos_cemiterio", 1.8f, null, Colisor.Nenhum);
             float[,] dp = { { -9f, -58f }, { 10f, -46f }, { -10f, -34f }, { 12f, -26f } };
             for (int i = 0; i < dp.GetLength(0); i++)
             {
@@ -126,12 +125,12 @@ namespace MongeArcano
                 GameObject pivo = new GameObject("Valsa_" + i);
                 pivo.transform.SetParent(ext, false);
                 pivo.transform.position = p;
-                if (danc.Count > 0) Modelos.Clonar(danc, rnd, pivo.transform, Vector3.zero, 0f, 1f, 1f);
+                GameObject casal = Modelos.Instanciar("dancarinos_cemiterio", pivo.transform, 1.9f, 0f);
+                if (casal == null) ProceduralModels.Prim(PrimitiveType.Capsule, pivo.transform, "CasalSimples", new Vector3(0f, 1f, 0f), new Vector3(0.8f, 1f, 0.8f), "Osso");
                 DancaValsa dv = pivo.AddComponent<DancaValsa>();
                 dv.velocidadeGiro = i % 2 == 0 ? 75f : -75f;
-                ProceduralModels.Luz(pivo.transform, "LuzDanca", new Vector3(0f, 1.6f, 0f), new Color(0.5f, 0.7f, 1f), 1.0f, 6f, true);
+                ProceduralModels.Luz(pivo.transform, "LuzDanca", new Vector3(0f, 1.6f, 0f), new Color(0.5f, 0.7f, 1f), 1.1f, 6f, true);
             }
-            Modelos.Liberar(danc);
 
             // altar de salvamento inicial e itens do caminho
             Altar(new Vector3(-6f, 0f, -68f));
