@@ -17,11 +17,14 @@ namespace MongeArcano
 
         public Transform alvo;
         public ModoCamera modo = ModoCamera.Terceira;
-        public float distancia = 6.5f;
-        public float inclinacao = 14f;
+        public float distancia = 4.8f;
+        public float inclinacao = 12f;
         public float giro;
         public float alturaFoco = 1.55f;
-        public float ombro = 0.45f;
+        public float ombro = 0.7f;
+        public bool Mirando { get { return mirando; } }
+        bool mirando;
+        float distAtual, ombroAtual = 0.7f;
         public float suavizacao = 7f;
 
         Vector3 pos, focoPos, focoCentro;
@@ -144,10 +147,13 @@ namespace MongeArcano
 
             GameManager gm = GameManager.Instance;
             bool jogando = gm != null && gm.Estado == EstadoJogo.Jogando;
+            bool travar = jogando && modo == ModoCamera.Terceira && !Application.isBatchMode;
+            if (Cursor.lockState != (travar ? CursorLockMode.Locked : CursorLockMode.None)) Cursor.lockState = travar ? CursorLockMode.Locked : CursorLockMode.None;
+            Cursor.visible = !travar;
             if (jogando && Input.GetKeyDown(KeyCode.Y))
             {
                 modo = modo == ModoCamera.Terceira ? ModoCamera.Fixa : ModoCamera.Terceira;
-                gm.Mostrar(modo == ModoCamera.Terceira ? "Câmera: TERCEIRA PESSOA. Botão direito + mouse gira, roda dá zoom. [Y] troca." : "Câmera: FIXA por sala. [Y] troca.", 3f);
+                gm.Mostrar(modo == ModoCamera.Terceira ? "Câmera: TERCEIRA PESSOA. Mouse gira, botão direito mira, roda dá zoom. [Y] troca." : "Câmera: FIXA por sala. [Y] troca.", 3f);
                 if (modo == ModoCamera.Fixa) { ZonaCamera.Resetar(); ZonaCamera.AtivarPara(alvo.position); }
             }
             if (alvo == null) return;
@@ -158,33 +164,30 @@ namespace MongeArcano
             {
                 if (jogando)
                 {
-                    bool orbitando = Input.GetMouseButton(1);
-                    if (orbitando)
-                    {
-                        giro += Input.GetAxis("Mouse X") * 3.2f;
-                        inclinacao = Mathf.Clamp(inclinacao - Input.GetAxis("Mouse Y") * 2.2f, 3f, 48f);
-                    }
+                    // estilo GTA / Call of Duty: o mouse sempre gira a câmera; botão direito = mirar (zoom sobre o ombro)
+                    mirando = Input.GetMouseButton(1);
+                    float sens = mirando ? 1.5f : 2.6f;
+                    float mx = Input.GetAxis("Mouse X"), my = Input.GetAxis("Mouse Y");
+                    giro += mx * sens;
+                    inclinacao = Mathf.Clamp(inclinacao - my * sens * 0.8f, -10f, 55f);
                     float roda = Input.GetAxis("Mouse ScrollWheel");
-                    if (roda != 0f) distancia = Mathf.Clamp(distancia - roda * 6f, 3.5f, 14f);
+                    if (roda != 0f) distancia = Mathf.Clamp(distancia - roda * 4f, 2.8f, 9f);
 
                     Inimigo travado = jogador != null ? jogador.AlvoTravado : null;
-                    if (travado != null && !orbitando)
+                    if (travado != null && Mathf.Abs(mx) < 0.02f)
                     {
                         Vector3 para = travado.transform.position - alvo.position;
                         float yawAlvo = Mathf.Atan2(para.x, para.z) * Mathf.Rad2Deg;
                         giro = Mathf.LerpAngle(giro, yawAlvo, 1f - Mathf.Exp(-2.5f * dt));
                     }
-                    else if (!orbitando && jogador != null && jogador.VelocidadeAtual > 0.6f)
-                    {
-                        float yawAlvo = alvo.eulerAngles.y;
-                        float dif = Mathf.DeltaAngle(giro, yawAlvo);
-                        if (Mathf.Abs(dif) < 115f) giro += dif * (1f - Mathf.Exp(-1.1f * dt));
-                    }
                 }
+                else mirando = false;
+                distAtual = Mathf.Lerp(distAtual <= 0f ? distancia : distAtual, mirando ? Mathf.Min(distancia, 2.9f) : distancia, 1f - Mathf.Exp(-9f * dt));
+                ombroAtual = Mathf.Lerp(ombroAtual, mirando ? 0.95f : ombro, 1f - Mathf.Exp(-9f * dt));
 
                 Quaternion rot = Quaternion.Euler(inclinacao, giro, 0f);
-                Vector3 f = alvo.position + Vector3.up * alturaFoco + rot * Vector3.right * ombro;
-                Vector3 desejado = f - rot * Vector3.forward * distancia;
+                Vector3 f = alvo.position + Vector3.up * alturaFoco + rot * Vector3.right * ombroAtual;
+                Vector3 desejado = f - rot * Vector3.forward * distAtual;
                 Vector3 dir = desejado - f;
                 float d = dir.magnitude;
                 float livre = d;
@@ -200,7 +203,7 @@ namespace MongeArcano
                     desejado = f + dir / d * livre;
                 }
                 transform.rotation = Quaternion.Slerp(transform.rotation, rot, 1f - Mathf.Exp(-12f * dt));
-                cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, 50f, 1f - Mathf.Exp(-6f * dt));
+                cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, mirando ? 40f : 54f, 1f - Mathf.Exp(-8f * dt));
                 p2 = Vector3.Lerp(transform.position, desejado, 1f - Mathf.Exp(-14f * dt));
                 OcultarParedes(f);
             }

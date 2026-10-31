@@ -75,7 +75,13 @@ namespace MongeArcano
             if (castelo != null) castelo.transform.localPosition = new Vector3(0f, -6f, 78f);
 
             // entrada
-            Colocar("portao_gotico", ext, new Vector3(0f, 0f, -10.9f), 3.9f, 180f, Colisor.Nenhum, "Obsidiana", new Vector3(4f, 3.9f, 0.3f));
+            GameObject gate = Modelos.Instanciar("portao_gotico", ext, 3.9f, 180f, "Obsidiana");
+            if (gate != null)
+            {
+                gate.transform.localPosition = new Vector3(0f, 0f, -10.9f);
+                if (PortaoDuplo.Montar(gate, "porta_principal") == null) Debug.LogWarning("Portão gótico sem folhas: reimporte o GLB do Pacote 4.");
+            }
+            else Colocar("portao_gotico", ext, new Vector3(0f, 0f, -10.9f), 3.9f, 180f, Colisor.Nenhum, "Obsidiana", new Vector3(4f, 3.9f, 0.3f));
             Colocar("bandeira", ext, new Vector3(-4.8f, 0f, -11.2f), 4.5f, 180f, Colisor.Nenhum, "Tapete", new Vector3(1f, 4.5f, 0.1f));
             Colocar("bandeira", ext, new Vector3(4.8f, 0f, -11.2f), 4.5f, 180f, Colisor.Nenhum, "Tapete", new Vector3(1f, 4.5f, 0.1f));
             Colocar("carruagem", ext, new Vector3(-10f, 0f, -22f), 2.8f, 150f, Colisor.Caixa, "Madeira", new Vector3(2f, 2.8f, 3f));
@@ -117,20 +123,32 @@ namespace MongeArcano
             }
             Modelos.Liberar(arvores);
 
-            // casal esquelético dançando valsa sombria entre os túmulos
+            // casais de esqueletos dançando valsa sombria entre os túmulos
             float[,] dp = { { -9f, -58f }, { 10f, -46f }, { -10f, -34f }, { 12f, -26f } };
             for (int i = 0; i < dp.GetLength(0); i++)
             {
-                Vector3 p = new Vector3(dp[i, 0], 0f, dp[i, 1]);
                 GameObject pivo = new GameObject("Valsa_" + i);
                 pivo.transform.SetParent(ext, false);
-                pivo.transform.position = p;
-                GameObject casal = Modelos.Instanciar("dancarinos_cemiterio", pivo.transform, 1.9f, 0f);
-                if (casal == null) ProceduralModels.Prim(PrimitiveType.Capsule, pivo.transform, "CasalSimples", new Vector3(0f, 1f, 0f), new Vector3(0.8f, 1f, 0.8f), "Osso");
-                DancaValsa dv = pivo.AddComponent<DancaValsa>();
-                dv.velocidadeGiro = i % 2 == 0 ? 75f : -75f;
-                ProceduralModels.Luz(pivo.transform, "LuzDanca", new Vector3(0f, 1.6f, 0f), new Color(0.5f, 0.7f, 1f), 1.1f, 6f, true);
+                pivo.transform.position = new Vector3(dp[i, 0], 0f, dp[i, 1]);
+                ValsaEsqueletos val = pivo.AddComponent<ValsaEsqueletos>();
+                val.giro = i % 2 == 0 ? 38f : -38f;
+                for (int k = 0; k < 2; k++)
+                {
+                    GameObject dn = Modelos.Instanciar("esqueleto_guerreiro", pivo.transform, 1.75f, 0f);
+                    if (dn == null) dn = ProceduralModels.Prim(PrimitiveType.Capsule, pivo.transform, "DancarinoSimples", new Vector3(0f, 1f, 0f), new Vector3(0.6f, 1f, 0.6f), "Osso");
+                    else
+                    {
+                        UalAnimador ua = UalAnimador.Montar(dn, dn, UalAnimador.Perfil.Npc);
+                        if (ua != null) { ua.loopInicial = "Dance_Loop"; ua.velocidadeLoop = k == 0 ? 0.95f : 1.05f; }
+                    }
+                    if (k == 0) val.a = dn.transform; else val.b = dn.transform;
+                }
+                ProceduralModels.Luz(pivo.transform, "LuzDanca", new Vector3(0f, 2.2f, 0f), new Color(1f, 0.82f, 0.55f), 1.2f, 7f, true);
             }
+
+            // baús do jardim (equipamentos e poções)
+            CriarBau(tProps, new Vector3(-4.2f, 0f, -62f), 25f, 3, 0.1f);
+            CriarBau(tProps, new Vector3(4.6f, 0f, -31f), 340f, 3, 0.15f);
 
             // altar de salvamento inicial e itens do caminho
             Altar(new Vector3(-6f, 0f, -68f));
@@ -141,13 +159,20 @@ namespace MongeArcano
             Item(TipoColetavel.Frasco, new Vector3(2.6f, 0.6f, -44f), "", "", "");
 
             // Mensageiro (NPC). O gatilho de conversa tem raio em metros reais.
+            UalAnimador npcAnim = null;
             Vector3 pm = new Vector3(5f, 0f, -64f);
             GameObject msg = Modelos.Instanciar("mensageiro", tProps, 2.2f, 200f);
             if (msg == null) msg = ProceduralModels.Prim(PrimitiveType.Capsule, tProps, "Mensageiro", pm + new Vector3(0f, 1f, 0f), new Vector3(0.8f, 1f, 0.8f), "TecidoEscuro", false);
-            else msg.transform.localPosition = pm;
+            else
+            {
+                msg.transform.localPosition = pm;
+                npcAnim = UalAnimador.Montar(msg, msg, UalAnimador.Perfil.Npc);
+            }
             GameObject gat = Modelos.Gatilho("ConversaMensageiro", tProps, pm + new Vector3(0f, 1f, 0f), 1.4f);
             NpcFalante npc = gat.AddComponent<NpcFalante>();
             npc.alvoCamera = msg.transform;
+            npc.corpo = msg.transform;
+            npc.animador = npcAnim;
             npc.nome = "Mensageiro";
             npc.fala = "[Texto provisório - a história será escrita pelo autor]\n\nBem-vindo ao Mosteiro de Névoa Negra, monge. Poucos chegam até aqui sem perder a esperança.\n\nSiga o caminho entre os túmulos. Os mortos não descansam nesta terra, e o que dorme dentro do mosteiro é pior.\n\nReze no altar antes de seguir. Ele guardará o seu progresso.";
             ProceduralModels.Luz(tProps, "LuzMensageiro", pm + new Vector3(0f, 2.4f, 0f), new Color(0.6f, 0.7f, 1f), 1.2f, 6f, true);

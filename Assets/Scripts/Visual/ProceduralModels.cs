@@ -124,6 +124,7 @@ namespace MongeArcano
             Luz(raiz.transform, "LuzJogador", new Vector3(0f, 1.8f, -0.2f), new Color(0.75f, 0.85f, 1f), 0.9f, 7f, false);
 
             GameObject escudo = Prim(PrimitiveType.Sphere, raiz.transform, "EscudoMistico", new Vector3(0f, 1f, 0f), Vector3.one * 2.3f, "Fantasma");
+            FxMagia.EscudoHex(escudo, new Color(0.45f, 0.7f, 1f, 0.9f));
             escudo.SetActive(false);
             AnimadorProcedural an = raiz.AddComponent<AnimadorProcedural>();
             an.corpo = v;
@@ -133,16 +134,8 @@ namespace MongeArcano
             an.rolagem = 2f;
             an.passos = true;
 
-            RigAnimador rigJ = RigAnimador.Montar(raiz, malhaMonge);
-            if (rigJ != null)
-            {
-                an.rig = rigJ;
-                an.estilo = 0.35f;
-                rigJ.roupao = true;
-                rigJ.ampBracos = 22f;
-                rigJ.frequencia = 8.5f;
-                rigJ.ampTronco = 8f;
-            }
+            UalAnimador ualJ = UalAnimador.Montar(raiz, malhaMonge, UalAnimador.Perfil.Monge);
+            if (ualJ != null) an.ual = ualJ;
 
             PlayerController pc = raiz.AddComponent<PlayerController>();
             pc.escudoVisual = escudo;
@@ -195,13 +188,8 @@ namespace MongeArcano
             }
 
             GameObject malha = Modelos.Instanciar(nomeModelo, m, altura, 0f, pintura);
-            RigAnimador rig = RigAnimador.Montar(go, malha);
-            if (rig != null)
-            {
-                an.rig = rig;
-                an.estilo = 0.35f;
-                ParametrosRig(rig, tipo);
-            }
+            UalAnimador ual = UalAnimador.Montar(go, malha, PerfilUal(tipo));
+            if (ual != null) an.ual = ual;
             if (malha == null)
             {
                 // sem o modelo importado: usa as formas simples do protótipo
@@ -285,19 +273,18 @@ namespace MongeArcano
             return ini;
         }
 
-        static void ParametrosRig(RigAnimador r, TipoInimigo tipo)
+        static UalAnimador.Perfil PerfilUal(TipoInimigo tipo)
         {
             switch (tipo)
             {
-                case TipoInimigo.Possuido: r.roupao = true; r.ampBracos = 30f; r.frequencia = 5.5f; break;
-                case TipoInimigo.Infernal: r.ampPernas = 26f; r.ampBracos = 26f; r.frequencia = 6.5f; break;
-                case TipoInimigo.Arconte: r.roupao = true; r.ampBracos = 16f; r.frequencia = 4.2f; break;
-                case TipoInimigo.Esqueleto: r.ampPernas = 24f; r.ampBracos = 26f; r.frequencia = 8f; break;
-                case TipoInimigo.Armadura: r.ampPernas = 26f; r.ampBracos = 22f; r.frequencia = 6f; break;
+                case TipoInimigo.Possuido: return UalAnimador.Perfil.Zumbi;
+                case TipoInimigo.Infernal: return UalAnimador.Perfil.Besta;
+                case TipoInimigo.Monstro: return UalAnimador.Perfil.Besta;
+                case TipoInimigo.Arconte: return UalAnimador.Perfil.Chefe;
                 case TipoInimigo.BruxaVermelha:
                 case TipoInimigo.BruxaNegra:
-                case TipoInimigo.BruxaCinza: r.roupao = true; r.ampBracos = 20f; r.frequencia = 6f; break;
-                default: r.ampPernas = 24f; r.ampBracos = 22f; r.frequencia = 5.5f; break;
+                case TipoInimigo.BruxaCinza: return UalAnimador.Perfil.Bruxa;
+                default: return UalAnimador.Perfil.Guerreiro;
             }
         }
 
@@ -465,9 +452,8 @@ namespace MongeArcano
             go.transform.position = pos;
             string mat = amigavel ? "EmissaoAzul" : "EmissaoVermelha";
             float r = amigavel ? 0.14f : 0.3f;
-            Prim(PrimitiveType.Sphere, go.transform, "Nucleo", Vector3.zero, Vector3.one * r * 1.1f, mat);
             Color cf = amigavel ? new Color(0.45f, 0.6f, 1f) : new Color(1f, 0.35f, 0.12f);
-            Fx.Halo(go.transform, cf, r * (amigavel ? 9f : 7f));
+            FxMagia.Nucleo(go.transform, cf, r * (amigavel ? 8f : 6.5f));
             Fx.Rastro(go, cf, r * 1.7f);
             Fx.FaiscasContinuas(go.transform, cf);
 

@@ -8,6 +8,7 @@ namespace MongeArcano
         public static void Explosao(Vector3 pos, string material, float tamanhoFinal, float duracao)
         {
             Fx.Explodir(pos, CorDe(material), tamanhoFinal, duracao);
+            if (tamanhoFinal <= 4f) FxMagia.Impacto(pos, CorDe(material), tamanhoFinal);
         }
 
         public static Color CorDe(string material)

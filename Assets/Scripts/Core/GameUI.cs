@@ -311,7 +311,7 @@ namespace MongeArcano
             Rotulo(new Rect(0f, H * 0.08f, W, 90f * s), "MONGE ARCANO", titulo, new Color(1f, 0.75f, 0.25f));
             Rotulo(new Rect(0f, H * 0.08f + 80f * s, W, 50f * s), "O MOSTEIRO CONDENADO", grande, new Color(0.85f, 0.2f, 0.2f));
             string ajuda =
-                "W A S D: mover (relativo à câmera)     SHIFT: correr     Botão direito + mouse: girar a câmera     Roda: zoom     Y: câmera fixa\n" +
+                "W A S D: mover     SHIFT: correr     MOUSE: gira a câmera     Botão direito: mirar (zoom)     Roda: zoom     Y: câmera fixa\n" +
                 "ESPAÇO / clique: Raio Arcano (mira no alvo ou no centro da tela)     Z ou botão do meio: travar/destravar alvo\n" +
                 "F: Nova Sagrada   G: Leque Arcano   B: Escudo Místico   R: Invocação Celeste (Poder Arcano cheio)\n" +
                 "C: coletar / interagir / ler     V: curar     X: golpe de cajado     1 a 6: atalhos de itens     I: inventário e habilidades     TAB: pausa";

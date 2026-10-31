@@ -263,7 +263,7 @@ namespace MongeArcano
             gm.InimigosDerrotados++;
             gm.Evento("matar", tipo.ToString());
             gm.jogador.GanharXp(xp);
-            if (anim != null) anim.enabled = false;
+            if (anim != null) { if (anim.EmUal) anim.Morrer(); else anim.enabled = false; }
 
             foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
             foreach (Light l in GetComponentsInChildren<Light>()) l.enabled = false;
@@ -294,7 +294,8 @@ namespace MongeArcano
         IEnumerator Desabar()
         {
             Quaternion r0 = transform.rotation;
-            Quaternion r1 = flutua ? r0 : r0 * Quaternion.Euler(-90f, 0f, 0f);
+            bool ualMorte = anim != null && anim.EmUal;
+            Quaternion r1 = (flutua || ualMorte) ? r0 : r0 * Quaternion.Euler(-90f, 0f, 0f);
             Vector3 s0 = transform.localScale;
             float t = 0f;
             while (t < 0.5f)

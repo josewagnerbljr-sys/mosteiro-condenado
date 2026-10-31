@@ -77,7 +77,7 @@ namespace MongeArcano
             CriarPorta("Portao_Capela", new Vector3(-8f, 0f, 0f), true, new string[0], "");
             CriarPorta("Portao_Biblioteca", new Vector3(8f, 0f, 0f), true, new string[] { "ferro" }, "porta_biblioteca");
             CriarPorta("Portao_Catacumbas", new Vector3(0f, 0f, 8f), false, new string[] { "osso" }, "porta_catacumbas");
-            CriarPorta("Portao_Principal", new Vector3(0f, 0f, -8f), false, new string[0], "porta_principal");
+            // o portão de entrada agora é o portão gótico de duas folhas (veja Exterior)
             CriarPorta("Portao_Santuario", new Vector3(0f, 0f, 24f), false, new string[] { "sigilo_lua", "sigilo_fogo", "sigilo_terra" }, "porta_santuario");
 
             Exterior();

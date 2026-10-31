@@ -43,7 +43,7 @@ namespace MongeArcano
         {
             { "monge_clerigo", "MongeTunica" }, { "cavaleiro_sombrio", "Armadura" }, { "necromante", "NecromanteRoupa" },
             { "bruxa", "BruxaNegra" }, { "criptas", "PedraMusgo" }, { "lapides", "PedraMusgo" }, { "arvores_mortas", "MadeiraMorta" },
-            { "dancarinos_cemiterio", "Fantasma" }, { "altar_ossos", "Osso" }, { "altar_foco_boss", "PedraClara" },
+            { "dancarinos_cemiterio", "Osso" }, { "altar_ossos", "Osso" }, { "altar_foco_boss", "PedraClara" },
             { "monasterio_exterior", "Pedra" }, { "monasterio_interior", "Pedra" }, { "jardim_sombrio", "Terra" }
         };
 
@@ -74,10 +74,35 @@ namespace MongeArcano
             return b;
         }
 
-        public static void Pintar(GameObject go, string material)
+        static readonly HashSet<string> modelosVC = new HashSet<string> { "monge_clerigo", "necromante", "bruxa", "cavaleiro_sombrio" };
+
+        /// <summary>Pintura de miniatura (brilho e realce gravados nos vértices) com as cores do material indicado.</summary>
+        static Material MaterialVC(string material)
+        {
+            Material baseM = ProceduralModels.Mat(material);
+            Material vc = ProceduralModels.Mat("PinturaVC");
+            if (vc == null || vc.shader == null || vc.shader.name != "MongeArcano/PinturaVC") return baseM;
+            Material m = new Material(vc);
+            Color c = baseM.color, acento = new Color(0.9f, 0.75f, 0.35f);
+            float metal = 0.05f, suav = 0.25f;
+            switch (material)
+            {
+                case "MongeTunica": c = new Color(0.34f, 0.26f, 0.40f); acento = new Color(0.95f, 0.74f, 0.28f); break;
+                case "Armadura": c = new Color(0.32f, 0.33f, 0.41f); acento = new Color(0.82f, 0.84f, 0.92f); metal = 0.35f; suav = 0.4f; break;
+                case "NecromanteRoupa": c = new Color(0.28f, 0.22f, 0.36f); acento = new Color(0.55f, 0.95f, 0.70f); break;
+                case "BruxaVermelha": c = new Color(0.62f, 0.10f, 0.13f); acento = new Color(1f, 0.55f, 0.30f); break;
+                case "BruxaCinza": c = new Color(0.50f, 0.52f, 0.58f); acento = new Color(0.92f, 0.96f, 1f); break;
+                default: c = new Color(0.20f, 0.16f, 0.28f); acento = new Color(0.72f, 0.52f, 1f); break;
+            }
+            m.SetColor("_Color", c); m.SetColor("_Color2", acento);
+            m.SetFloat("_Metallic", metal); m.SetFloat("_Glossiness", suav);
+            return m;
+        }
+
+        public static void Pintar(GameObject go, string material, string nomeModelo = null)
         {
             if (string.IsNullOrEmpty(material)) return;
-            Material m = ProceduralModels.Mat(material);
+            Material m = (nomeModelo != null && modelosVC.Contains(nomeModelo)) ? MaterialVC(material) : ProceduralModels.Mat(material);
             Renderer[] rs = go.GetComponentsInChildren<Renderer>();
             for (int i = 0; i < rs.Length; i++)
             {
@@ -116,7 +141,7 @@ namespace MongeArcano
             w.transform.rotation = Quaternion.identity;
             inst.transform.SetParent(w.transform, true);
 
-            Pintar(w, tinta);
+            Pintar(w, tinta, nome);
             Sombras(w);
 
             Bounds b = Limites(w);

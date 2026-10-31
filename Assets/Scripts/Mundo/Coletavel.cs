@@ -41,8 +41,21 @@ namespace MongeArcano
             fase = Random.value * 6.28f;
         }
 
+        void Atrair()
+        {
+            GameManager g = GameManager.Instance;
+            if (!automatico || g == null || g.jogador == null || g.Estado != EstadoJogo.Jogando) return;
+            PlayerController p = g.jogador;
+            bool precisa = (tipo == TipoColetavel.Essencia && p.mana < p.manaMax) || (tipo == TipoColetavel.Erva && p.ervas < 9) || (tipo == TipoColetavel.Frasco && p.frascos < 9);
+            if (!precisa) return;
+            Vector3 alvo = p.transform.position + Vector3.up * 0.9f;
+            float d = (alvo - basePos).magnitude;
+            if (d < 4.5f) basePos = Vector3.MoveTowards(basePos, alvo, Mathf.Lerp(2f, 9f, 1f - d / 4.5f) * Time.deltaTime);
+        }
+
         void Update()
         {
+            Atrair();
             transform.position = basePos + Vector3.up * Mathf.Sin(Time.time * 2f + fase) * 0.08f;
             transform.Rotate(0f, 70f * Time.deltaTime, 0f, Space.World);
         }

@@ -16,7 +16,8 @@ namespace MongeArcano
         public float frequencia = 8f, inclinacao = 6f, balancoCorpo = 0.05f, oscilacaoOciosa = 0.012f, rolagem = 0f;
         public bool passos;
         public float estilo = 1.6f;
-        public RigAnimador rig;
+        public UalAnimador ual;
+        public bool EmUal { get { return ual != null; } }
 
         Quaternion baseBE = Quaternion.identity, baseBD = Quaternion.identity, baseCorpoRot = Quaternion.identity;
         Vector3 baseCorpoPos, posAnt;
@@ -31,12 +32,15 @@ namespace MongeArcano
             posAnt = transform.position;
         }
 
-        public void Atacar() { atqT = 0f; if (rig != null) rig.Atacar(); }
-        public void Conjurar() { gestoT = 0f; if (rig != null) rig.Conjurar(); }
-        public void Atingido() { hitT = 0f; if (rig != null) rig.Atingido(); }
+        public void Atacar() { atqT = 0f; if (ual != null) ual.Atacar(); }
+        public void Conjurar() { gestoT = 0f; if (ual != null) ual.Conjurar(); }
+        public void Atingido() { hitT = 0f; if (ual != null) ual.Atingido(); }
+        public void Morrer() { if (ual != null) ual.Morrer(); }
+        public void Reviver() { if (ual != null) ual.Reviver(); }
 
         void LateUpdate()
         {
+            if (ual != null) return;
             float dt = Time.deltaTime;
             if (dt <= 0f) return;
 

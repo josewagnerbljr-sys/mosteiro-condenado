@@ -124,6 +124,12 @@ namespace MongeArcano.EditorTools
                     AssetDatabase.CreateAsset(m, p0);
                 }
             }
+            p0 = Pasta + "/PinturaVC.mat";
+            if (AssetDatabase.LoadAssetAtPath<Material>(p0) == null)
+            {
+                Shader sh = Shader.Find("MongeArcano/PinturaVC");
+                if (sh != null) AssetDatabase.CreateAsset(new Material(sh), p0);
+            }
             p0 = Pasta + "/CinemaMat.mat";
             if (AssetDatabase.LoadAssetAtPath<Material>(p0) == null)
             {

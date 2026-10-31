@@ -40,8 +40,8 @@ namespace MongeArcano
         public const int NivelMax = 50;
 
         [Header("Movimento")]
-        public float velAndar = 3.4f;
-        public float velCorrer = 6f;
+        public float velAndar = 1.7f;
+        public float velCorrer = 5f;
         public float velRe = 2f;
         public float velGiro = 135f;
         public bool modoTanque;
@@ -352,6 +352,7 @@ namespace MongeArcano
             Vector3 c = transform.position + Vector3.up;
             DanoArea(c, 5.5f, DanoMagia(1, 45f), 6f, 14f);
             Efeitos.Explosao(c, "EmissaoAzul", 11f, 0.55f);
+            FxMagia.NovaRunica(c, new Color(0.55f, 0.75f, 1f), 5.5f);
             GameManager.Instance.Tremer(0.35f);
             Som.Tocar(TipoSom.Nova, c, 1f);
         }
@@ -638,11 +639,15 @@ namespace MongeArcano
         void Morrer()
         {
             morto = true;
-            if (anim != null) anim.enabled = false;
-            if (visual != null)
+            if (anim != null && anim.EmUal) anim.Morrer();
+            else
             {
-                visual.localRotation = Quaternion.Euler(-90f, 0f, 0f);
-                visual.localPosition = new Vector3(0f, 0.25f, 0f);
+                if (anim != null) anim.enabled = false;
+                if (visual != null)
+                {
+                    visual.localRotation = Quaternion.Euler(-90f, 0f, 0f);
+                    visual.localPosition = new Vector3(0f, 0.25f, 0f);
+                }
             }
             Som.Tocar(TipoSom.Morte, transform.position, 1f);
             GameManager.Instance.JogadorMorreu();
@@ -662,7 +667,7 @@ namespace MongeArcano
             empurrao = Vector3.zero;
             invulAte = Time.time + 2f;
             if (escudoVisual != null) escudoVisual.SetActive(false);
-            if (anim != null) anim.enabled = true;
+            if (anim != null) { anim.enabled = true; anim.Reviver(); }
             if (visual != null)
             {
                 visual.localRotation = Quaternion.identity;
