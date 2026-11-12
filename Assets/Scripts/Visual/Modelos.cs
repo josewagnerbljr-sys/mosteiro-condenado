@@ -41,8 +41,8 @@ namespace MongeArcano
 
         static readonly Dictionary<string, string> pinturaPadrao = new Dictionary<string, string>
         {
-            { "monge_clerigo", "MongeTunica" }, { "cavaleiro_sombrio", "Armadura" }, { "necromante", "NecromanteRoupa" },
-            { "bruxa", "BruxaNegra" }, { "criptas", "PedraMusgo" }, { "lapides", "PedraMusgo" }, { "arvores_mortas", "MadeiraMorta" },
+            { "cavaleiro_sombrio", "Armadura" }, { "necromante", "NecromanteRoupa" },
+            { "criptas", "PedraMusgo" }, { "lapides", "PedraMusgo" }, { "arvores_mortas", "MadeiraMorta" },
             { "dancarinos_cemiterio", "Osso" }, { "altar_ossos", "Osso" }, { "altar_foco_boss", "PedraClara" },
             { "monasterio_exterior", "Pedra" }, { "monasterio_interior", "Pedra" }, { "jardim_sombrio", "Terra" }
         };
@@ -69,12 +69,17 @@ namespace MongeArcano
         {
             Renderer[] rs = go.GetComponentsInChildren<Renderer>();
             if (rs.Length == 0) return new Bounds(go.transform.position, Vector3.zero);
-            Bounds b = rs[0].bounds;
-            for (int i = 1; i < rs.Length; i++) b.Encapsulate(rs[i].bounds);
+            bool primeiro = true;
+            Bounds b = new Bounds(go.transform.position, Vector3.zero);
+            for (int i = 0; i < rs.Length; i++)
+            {
+                if (rs[i].gameObject.name == "Cajado") continue; // o cajado na mão não entra na medida do corpo
+                if (primeiro) { b = rs[i].bounds; primeiro = false; } else b.Encapsulate(rs[i].bounds);
+            }
             return b;
         }
 
-        static readonly HashSet<string> modelosVC = new HashSet<string> { "monge_clerigo", "necromante", "bruxa", "cavaleiro_sombrio" };
+        static readonly HashSet<string> modelosVC = new HashSet<string> { "cavaleiro_sombrio" };
 
         /// <summary>Pintura de miniatura (brilho e realce gravados nos vértices) com as cores do material indicado.</summary>
         static Material MaterialVC(string material)

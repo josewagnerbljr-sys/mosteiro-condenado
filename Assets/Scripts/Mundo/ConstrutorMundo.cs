@@ -86,6 +86,7 @@ namespace MongeArcano
             Torre();
             Secreta();
             Masmorra();
+            Refino();
 
             GameObject portal = CriarPortal(new Vector3(0f, 0f, 34f));
             PlayerController jogador = ProceduralModels.CriarJogador(new Vector3(0f, 0.05f, -72f), 0f);
@@ -276,7 +277,7 @@ namespace MongeArcano
             Transform t = Filho(tProps, "Tocha");
             t.position = pos;
             ProceduralModels.Prim(PrimitiveType.Cube, t, "Suporte", new Vector3(0f, -0.2f, 0f), new Vector3(0.12f, 0.5f, 0.12f), "Madeira");
-            ProceduralModels.Prim(PrimitiveType.Sphere, t, "Chama", new Vector3(0f, 0.15f, 0f), new Vector3(0.24f, 0.34f, 0.24f), "EmissaoLaranja");
+            FxMagia.ChamaFixa(t, pos + new Vector3(0f, 0.3f, 0f), 0.75f);
             ProceduralModels.Luz(t, "Luz", new Vector3(0f, 0.3f, 0f), new Color(1f, 0.55f, 0.2f), 1.5f, 9f, true);
         }
 

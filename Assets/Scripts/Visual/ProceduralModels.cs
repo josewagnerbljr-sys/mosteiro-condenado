@@ -177,13 +177,14 @@ namespace MongeArcano
             {
                 case TipoInimigo.Possuido: nomeModelo = "aparicao"; altura = 2.0f; raio = 0.45f; break;
                 case TipoInimigo.Espectro: nomeModelo = "espectro"; altura = 2.0f; raio = 0.4f; break;
-                case TipoInimigo.Infernal: nomeModelo = "demonio"; altura = 2.6f; raio = 0.55f; break;
+                case TipoInimigo.Infernal: nomeModelo = "imp"; altura = 1.9f; raio = 0.5f; break;
+                case TipoInimigo.Puglin: nomeModelo = "puglin"; altura = 1.35f; raio = 0.4f; break;
                 case TipoInimigo.Arconte: nomeModelo = "boss_morte"; altura = 3.6f; raio = 0.8f; break;
                 case TipoInimigo.Esqueleto: nomeModelo = "esqueleto_guerreiro"; altura = 1.8f; raio = 0.4f; break;
                 case TipoInimigo.Armadura: nomeModelo = "armadura_assombrada"; altura = 2.1f; raio = 0.5f; break;
-                case TipoInimigo.BruxaVermelha: nomeModelo = "bruxa"; altura = 1.9f; raio = 0.42f; pintura = "BruxaVermelha"; break;
-                case TipoInimigo.BruxaNegra: nomeModelo = "bruxa"; altura = 1.8f; raio = 0.42f; pintura = "BruxaNegra"; break;
-                case TipoInimigo.BruxaCinza: nomeModelo = "bruxa"; altura = 1.8f; raio = 0.42f; pintura = "BruxaCinza"; break;
+                case TipoInimigo.BruxaVermelha: nomeModelo = "bruxa_vermelha"; altura = 1.85f; raio = 0.42f; break;
+                case TipoInimigo.BruxaNegra: nomeModelo = "bruxa_negra"; altura = 1.8f; raio = 0.42f; break;
+                case TipoInimigo.BruxaCinza: nomeModelo = "bruxa_cinza"; altura = 1.8f; raio = 0.42f; break;
                 case TipoInimigo.Monstro: nomeModelo = "monstro"; altura = 3.4f; raio = 0.8f; break;
             }
 
@@ -219,6 +220,11 @@ namespace MongeArcano
                     ini.deteccao = 9f; ini.intervaloAtaque = 1.0f; ini.chanceDrop = 0.3f; ini.xp = 14f;
                     ini.flutua = true; ini.alturaFlutuar = 0.7f;
                     an.frequencia = 3f; an.rolagem = 5f; an.oscilacaoOciosa = 0.08f;
+                    break;
+                case TipoInimigo.Puglin:
+                    ini.nomeExibido = "Puglin"; ini.vidaMax = 55f; ini.velocidade = 2.7f; ini.dano = 11f; ini.alcanceAtaque = 1.4f;
+                    ini.deteccao = 9f; ini.intervaloAtaque = 1.1f; ini.chanceDrop = 0.3f; ini.xp = 16f;
+                    an.frequencia = 7f;
                     break;
                 case TipoInimigo.Infernal:
                     ini.nomeExibido = "Criatura Infernal"; ini.vidaMax = 120f; ini.velocidade = 2.4f; ini.dano = 22f; ini.alcanceAtaque = 1.9f;
@@ -278,7 +284,8 @@ namespace MongeArcano
             switch (tipo)
             {
                 case TipoInimigo.Possuido: return UalAnimador.Perfil.Zumbi;
-                case TipoInimigo.Infernal: return UalAnimador.Perfil.Besta;
+                case TipoInimigo.Infernal: return UalAnimador.Perfil.Guerreiro;
+                case TipoInimigo.Puglin: return UalAnimador.Perfil.Guerreiro;
                 case TipoInimigo.Monstro: return UalAnimador.Perfil.Besta;
                 case TipoInimigo.Arconte: return UalAnimador.Perfil.Chefe;
                 case TipoInimigo.BruxaVermelha:

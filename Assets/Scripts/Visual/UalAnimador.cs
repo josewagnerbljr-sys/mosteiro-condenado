@@ -13,6 +13,11 @@ namespace MongeArcano
         public enum Perfil { Monge, Guerreiro, Bruxa, Zumbi, Besta, Chefe, Npc }
 
         public Perfil perfil;
+        public static readonly List<UalAnimador> Todos = new List<UalAnimador>();
+        public string ClipeAtual { get { return atual; } }
+        public float VelAtual { get { return velSuave; } }
+        void OnEnable() { Todos.Add(this); }
+        void OnDisable() { Todos.Remove(this); }
         public string loopInicial = "";
         public float velocidadeLoop = 1f;
         public bool Pronto { get; private set; }
@@ -35,12 +40,12 @@ namespace MongeArcano
         {
             if (malha == null) return null;
             Modelos.Prefab("ual_animacoes"); // garante o registro do arquivo de clipes na geração da cena
+            BibliotecaUal.Garantir();
             Transform arm = Achar(malha.transform, "Armature");
             if (arm == null || malha.GetComponentInChildren<SkinnedMeshRenderer>(true) == null) return null;
             UalAnimador u = raiz.GetComponent<UalAnimador>();
             if (u == null) u = raiz.AddComponent<UalAnimador>();
             u.perfil = perfil;
-            u.raizModelo = arm.parent;
             return u;
         }
 
@@ -60,12 +65,32 @@ namespace MongeArcano
             if (carregado) return;
             carregado = true;
             clipes = new List<AnimationClip>();
-            GameObject prefab = Modelos.Prefab("ual_animacoes");
-            if (prefab == null) return;
-            GameObject temp = Object.Instantiate(prefab);
-            Animation a = temp.GetComponentInChildren<Animation>(true);
-            if (a != null) foreach (AnimationState st in a) if (st.clip != null) clipes.Add(st.clip);
-            Object.Destroy(temp);
+            AnimationClip[] origem = null;
+            if (BibliotecaUal.Instancia != null && BibliotecaUal.Instancia.clipes != null && BibliotecaUal.Instancia.clipes.Length > 0) origem = BibliotecaUal.Instancia.clipes;
+            else
+            {
+                // alternativa: lê do prefab importado (Animation legada ou Animator do glTFast)
+                GameObject prefab = Modelos.Prefab("ual_animacoes");
+                if (prefab != null)
+                {
+                    GameObject temp = Object.Instantiate(prefab);
+                    List<AnimationClip> l = new List<AnimationClip>();
+                    Animation a = temp.GetComponentInChildren<Animation>(true);
+                    if (a != null) foreach (AnimationState st in a) if (st.clip != null) l.Add(st.clip);
+                    Animator an = temp.GetComponentInChildren<Animator>(true);
+                    if (l.Count == 0 && an != null && an.runtimeAnimatorController != null) l.AddRange(an.runtimeAnimatorController.animationClips);
+                    Object.Destroy(temp);
+                    origem = l.ToArray();
+                }
+            }
+            if (origem == null) return;
+            for (int i = 0; i < origem.Length; i++)
+            {
+                AnimationClip c = origem[i];
+                if (c == null || c.name.StartsWith("__preview__")) continue;
+                if (!c.legacy) { AnimationClip c2 = Object.Instantiate(c); c2.name = c.name; c2.legacy = true; c = c2; }
+                clipes.Add(c);
+            }
         }
 
         void Perfis()
@@ -96,15 +121,33 @@ namespace MongeArcano
             }
         }
 
+        public string Diagnostico = "";
+        Transform cajado;
+        Quaternion cajadoLocalBase;
+        public float estabilizacaoCajado = 0.6f;
+
+        void Falhou(string motivo)
+        {
+            Diagnostico = motivo;
+            Debug.LogWarning("[UAL] " + name + ": " + motivo);
+            GameManager gm = GameManager.Instance;
+            if (gm != null && perfil == Perfil.Monge) gm.Mostrar("UAL falhou: " + motivo, 12f);
+        }
+
         void Start()
         {
-            if (!Application.isPlaying || raizModelo == null) return;
+            if (!Application.isPlaying) return;
+            // o campo do modelo NÃO é salvo na cena: procura a raiz do esqueleto na partida
+            Transform arm = Achar(transform, "Armature");
+            if (arm == null) { Falhou("nó Armature não encontrado no modelo (reimporte os GLB do pacote)"); return; }
+            raizModelo = arm.parent;
+            cajado = Achar(raizModelo, "Cajado");
+            if (cajado != null) cajadoLocalBase = cajado.localRotation;
             Perfis();
             CarregarClipes();
             if (clipes == null || clipes.Count == 0)
             {
-                GameManager gm = GameManager.Instance;
-                if (gm != null && !avisou) { avisou = true; gm.Mostrar("Animações UAL não encontradas: confira Assets/Modelos/Animacoes/ual_animacoes.glb", 8f); }
+                Falhou("clipes não encontrados (Assets/Modelos/Animacoes/ual_animacoes.glb; gere a cena de novo)");
                 return;
             }
             anim = raizModelo.GetComponent<Animation>();
@@ -123,10 +166,11 @@ namespace MongeArcano
             posAnt = transform.position;
             Tocar(idle, 0f, 1f);
             Pronto = true;
+            Diagnostico = "ok " + clipes.Count + " clipes";
+            GameManager gmOk = GameManager.Instance;
+            if (gmOk != null && perfil == Perfil.Monge) gmOk.Mostrar("Animações UAL ativas: " + clipes.Count + " clipes.", 4f);
             if (!string.IsNullOrEmpty(loopInicial)) TocarLoop(loopInicial, velocidadeLoop);
         }
-
-        static bool avisou;
 
         void Tocar(string nome, float fade, float velocidade)
         {
@@ -191,6 +235,15 @@ namespace MongeArcano
             bloqueioAte = float.MaxValue;
             atual = null;
             Tocar(nome, 0.2f, velocidade);
+        }
+
+        void LateUpdate()
+        {
+            // o cajado acompanha a mão, mas fica mais vertical (um monge andando com cajado não o balança como um braço)
+            if (cajado == null || !Pronto) return;
+            float k = Time.time < bloqueioAte ? 0.2f : estabilizacaoCajado;
+            Quaternion daMao = cajado.parent.rotation * cajadoLocalBase;
+            cajado.rotation = Quaternion.Slerp(daMao, raizModelo.rotation, k);
         }
 
         void Update()

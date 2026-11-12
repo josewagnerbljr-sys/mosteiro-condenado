@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MongeArcano
 {
-    public enum TipoInimigo { Possuido, Espectro, Infernal, Arconte, Esqueleto, Armadura, BruxaVermelha, BruxaNegra, BruxaCinza, Monstro }
+    public enum TipoInimigo { Possuido, Espectro, Infernal, Arconte, Esqueleto, Armadura, BruxaVermelha, BruxaNegra, BruxaCinza, Monstro, Puglin }
 
     /// <summary>
     /// IA simples e robusta (sem NavMesh): desperta por proximidade/visão, persegue, ataca corpo a corpo
@@ -186,7 +186,13 @@ namespace MongeArcano
         {
             ativo = true;
             Som.Tocar(tipo == TipoInimigo.Armadura ? TipoSom.Grito : TipoSom.Grunhido, transform.position, 0.8f);
-            if (tipo == TipoInimigo.Armadura) GameManager.Instance.Mostrar("A armadura ganha vida!", 2.5f);
+            if (tipo == TipoInimigo.Armadura)
+            {
+                GameManager.Instance.Mostrar("A armadura ganha vida!", 2.5f);
+                GameManager.Instance.Tremer(0.3f);
+                FxMagia.Impacto(transform.position + Vector3.up * 1.2f, new Color(0.7f, 0.8f, 1f), 2.4f);
+                Fx.Faiscas(transform.position + Vector3.up * 1.0f, new Color(0.8f, 0.9f, 1f), 24, 4f, 0.2f, 0.9f);
+            }
             if (chefe)
             {
                 GameManager.Instance.chefe = this;

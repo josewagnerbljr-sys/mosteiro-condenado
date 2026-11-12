@@ -247,6 +247,102 @@ namespace MongeArcano
             Fumar(chao + Vector3.up * 0.3f, cor, raio * 0.3f);
         }
 
+        /// <summary>Chama de tocha: duas lâminas de chama oscilando, brasas subindo e luz tremeluzente.</summary>
+        public static void ChamaFixa(Transform pai, Vector3 pos, float tam)
+        {
+            GameObject g = new GameObject("ChamaFx");
+            g.transform.SetParent(pai, false);
+            g.transform.position = pos;
+            Camada(g.transform, Chama(), new Color(1f, 0.62f, 0.2f), tam * 1.2f, 0f, 0.22f);
+            Camada(g.transform, Chama(), new Color(1f, 0.9f, 0.55f), tam * 0.7f, 0f, 0.3f);
+            Camada(g.transform, Fx.Brilho(), new Color(1f, 0.45f, 0.12f), tam * 2.4f, 0f, 0.15f);
+            Brasa(g.transform, pos);
+        }
+
+        static void Brasa(Transform pai, Vector3 pos)
+        {
+            GameObject go = new GameObject("Brasas");
+            go.transform.SetParent(pai, false);
+            go.transform.position = pos;
+            ParticleSystem ps = go.AddComponent<ParticleSystem>();
+            ParticleSystem.MainModule m = ps.main;
+            m.loop = true;
+            m.startLifetime = new ParticleSystem.MinMaxCurve(0.8f, 1.6f);
+            m.startSpeed = new ParticleSystem.MinMaxCurve(0.3f, 0.9f);
+            m.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.07f);
+            m.startColor = new Color(1f, 0.6f, 0.2f, 1f);
+            m.gravityModifier = -0.15f;
+            m.simulationSpace = ParticleSystemSimulationSpace.World;
+            ParticleSystem.EmissionModule e = ps.emission;
+            e.rateOverTime = 6f;
+            ParticleSystem.ShapeModule sh = ps.shape;
+            sh.shapeType = ParticleSystemShapeType.Sphere;
+            sh.radius = 0.08f;
+            ParticleSystem.SizeOverLifetimeModule sz = ps.sizeOverLifetime;
+            sz.enabled = true;
+            sz.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0f)));
+            go.GetComponent<ParticleSystemRenderer>().sharedMaterial = Fx.NovoMaterial(Fx.Brilho(), Color.white);
+            ps.Play();
+        }
+
+        /// <summary>Poeira flutuando num volume (salas): partículas lentas e suaves.</summary>
+        public static void Poeira(Transform pai, Vector3 centro, Vector3 tamanho, int quantidade)
+        {
+            GameObject go = new GameObject("PoeiraFx");
+            go.transform.SetParent(pai, false);
+            go.transform.position = centro;
+            ParticleSystem ps = go.AddComponent<ParticleSystem>();
+            ParticleSystem.MainModule m = ps.main;
+            m.loop = true;
+            m.startLifetime = new ParticleSystem.MinMaxCurve(6f, 10f);
+            m.startSpeed = new ParticleSystem.MinMaxCurve(0.02f, 0.12f);
+            m.startSize = new ParticleSystem.MinMaxCurve(0.04f, 0.1f);
+            m.startColor = new Color(0.9f, 0.8f, 0.65f, 0.35f);
+            m.maxParticles = quantidade;
+            m.simulationSpace = ParticleSystemSimulationSpace.World;
+            ParticleSystem.EmissionModule e = ps.emission;
+            e.rateOverTime = quantidade / 8f;
+            ParticleSystem.ShapeModule sh = ps.shape;
+            sh.shapeType = ParticleSystemShapeType.Box;
+            sh.scale = tamanho;
+            ParticleSystemRenderer r = go.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = Fx.NovoMaterial(Fx.Brilho(), Color.white);
+            ps.Play();
+        }
+
+        /// <summary>Cinzas e brasas caindo devagar sobre o cemitério.</summary>
+        public static void Cinzas(Transform pai, Vector3 centro, Vector3 tamanho)
+        {
+            GameObject go = new GameObject("CinzasFx");
+            go.transform.SetParent(pai, false);
+            go.transform.position = centro;
+            ParticleSystem ps = go.AddComponent<ParticleSystem>();
+            ParticleSystem.MainModule m = ps.main;
+            m.loop = true;
+            m.startLifetime = new ParticleSystem.MinMaxCurve(8f, 14f);
+            m.startSpeed = new ParticleSystem.MinMaxCurve(0.05f, 0.25f);
+            m.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.14f);
+            m.startColor = new Color(1f, 0.55f, 0.3f, 0.7f);
+            m.gravityModifier = 0.012f;
+            m.maxParticles = 700;
+            m.simulationSpace = ParticleSystemSimulationSpace.World;
+            ParticleSystem.EmissionModule e = ps.emission;
+            e.rateOverTime = 70f;
+            ParticleSystem.ShapeModule sh = ps.shape;
+            sh.shapeType = ParticleSystemShapeType.Box;
+            sh.scale = tamanho;
+            go.AddComponent<SeguirCamera>().deslocamento = new Vector3(0f, 4f, 0f);
+            ParticleSystem.ColorOverLifetimeModule cl = ps.colorOverLifetime;
+            cl.enabled = true;
+            Gradient g = new Gradient();
+            g.SetKeys(new GradientColorKey[] { new GradientColorKey(new Color(1f, 0.6f, 0.3f), 0f), new GradientColorKey(new Color(0.5f, 0.45f, 0.45f), 1f) },
+                      new GradientAlphaKey[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(0.8f, 0.15f), new GradientAlphaKey(0f, 1f) });
+            cl.color = new ParticleSystem.MinMaxGradient(g);
+            ParticleSystemRenderer r = go.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = Fx.NovoMaterial(Fx.Brilho(), Color.white);
+            ps.Play();
+        }
+
         /// <summary>Aplica a malha hexagonal giratória à esfera do escudo.</summary>
         public static void EscudoHex(GameObject esfera, Color cor)
         {
@@ -257,6 +353,17 @@ namespace MongeArcano
             r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             EscudoGira g = esfera.GetComponent<EscudoGira>();
             if (g == null) esfera.AddComponent<EscudoGira>();
+        }
+    }
+
+    /// <summary>Mantém um efeito (como as cinzas) sempre em volta da câmera.</summary>
+    public class SeguirCamera : MonoBehaviour
+    {
+        public Vector3 deslocamento;
+        void LateUpdate()
+        {
+            Camera c = Camera.main;
+            if (c != null) transform.position = c.transform.position + deslocamento;
         }
     }
 

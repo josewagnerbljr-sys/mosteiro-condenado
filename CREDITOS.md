@@ -1,11 +1,18 @@
 # Créditos
 
 ## Animações
-- **Universal Animation Library** e **Universal Animation Library 2** (versões Standard) por **Quaternius** (https://quaternius.com), licença **CC0**. Obrigado! As animações de andar, correr, combate, magia, dano, morte, dança e interação dos personagens vêm destas bibliotecas.
+- **Universal Animation Library** e **Universal Animation Library 2** (Standard), por **Quaternius** (https://quaternius.com) - CC0. Andar, correr, combate, magia, dano, morte, dança e interação de todos os personagens.
 
-## Modelos 3D
-- Esculturas e peças do cenário fornecidas pelo autor do projeto (arquivos 3MF/GLB de terceiros, MakerWorld, Standard Digital File License). **Não são redistribuídos neste repositório** (a pasta `Assets/Modelos` fica no `.gitignore`).
-- Os personagens foram remontados sobre o esqueleto da UAL (pesos de pele transferidos do manequim da UAL) e o portão gótico foi dividido em moldura e duas folhas.
+## Personagens e monstros
+- **Modular Character Outfits - Fantasy** (Standard), **Quaternius** - CC0: corpo do Monge Elian, das três Bruxas e do Necromante (trajes "Ranger" masculino e feminino recoloridos).
+- **Bestiary - Dungeon Monsters Kit** (Standard), **Quaternius** - CC0: Imp e Puglin.
+
+## Cenário e adereços
+- **Stylized Nature MegaKit**, **Fantasy Props MegaKit** e **Medieval Village MegaKit** (Standard), **Quaternius** - CC0.
+- **KayKit Forest Nature Pack**, **Kay Lousberg** (https://kaylousberg.com) - CC0.
+
+## Modelos 3D do autor
+- Esculturas fornecidas pelo autor do projeto (MakerWorld, Standard Digital File License); **não são redistribuídas** neste repositório (a pasta `Assets/Modelos` fica no `.gitignore`). O cajado do monge e as demais esculturas foram remontados a partir delas.
 
 ## Software
-- Unity 6, glTFast (Unity Technologies), gltf-transform (Don McCurdy), scripts de montagem em `tools/`.
+- Unity 6, glTFast (Unity Technologies), gltf-transform (Donmccurdy). Scripts de montagem em `tools/`.

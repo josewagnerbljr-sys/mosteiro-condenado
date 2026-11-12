@@ -1,0 +1,26 @@
+=== DIAGNÓSTICO UAL 07/11/2026 00:14:10 ===
+ual_animacoes.glb: clipes=48 legacy=False exemplo=Chest_Open duração=1,37
+monge_clerigo: skinned=9 meshes=1 bones=65 Armature=False Animation=False  | Walk: pé moveu 0,000 m, mão moveu 0,000 m => NÃO ANIMA
+bruxa: skinned=1 meshes=0 bones=65 Armature=True Animation=False  | Walk: pé moveu 0,346 m, mão moveu 0,206 m => ANIMA
+esqueleto_guerreiro: skinned=1 meshes=0 bones=65 Armature=True Animation=False  | Walk: pé moveu 0,346 m, mão moveu 0,206 m => ANIMA
+armadura_assombrada: skinned=1 meshes=0 bones=65 Armature=True Animation=False  | Walk: pé moveu 0,346 m, mão moveu 0,206 m => ANIMA
+boss_morte: skinned=1 meshes=0 bones=65 Armature=True Animation=False  | Walk: pé moveu 0,346 m, mão moveu 0,206 m => ANIMA
+imp: skinned=5 meshes=0 bones=55 Armature=False Animation=False  | Walk: pé moveu 0,000 m, mão moveu 0,000 m => NÃO ANIMA
+puglin: skinned=3 meshes=0 bones=55 Armature=False Animation=False  | Walk: pé moveu 0,000 m, mão moveu 0,000 m => NÃO ANIMA
+prop_bau: skinned=2 meshes=0 bones=3 Armature=False Animation=False
+monstro: skinned=1 meshes=0 bones=65 Armature=True Animation=False  | Walk: pé moveu 0,346 m, mão moveu 0,206 m => ANIMA
+mensageiro: skinned=1 meshes=0 bones=65 Armature=True Animation=False  | Walk: pé moveu 0,346 m, mão moveu 0,206 m => ANIMA
+portao_gotico: skinned=0 meshes=3 bones=0 Armature=False Animation=False
+Cena Mosteiro: UalAnimador=40 (com Armature: 40)
+   perfil Guerreiro: 23
+   perfil Zumbi: 5
+   perfil Npc: 9
+   perfil Besta: 2
+   perfil Chefe: 1
+BibliotecaUal na cena: True  clipes=48
+Jogador na cena: True  UalAnimador no jogador=False
+Valsa Valsa_0: ativo=True pos=(-9.0, 0.0, -58.0) filhos=3 renderers=2 tamanho=(1.14, 1.75, 1.41) a=True b=True
+Valsa Valsa_2: ativo=True pos=(-10.0, 0.0, -34.0) filhos=3 renderers=2 tamanho=(1.14, 1.75, 1.41) a=True b=True
+Valsa Valsa_3: ativo=True pos=(12.0, 0.0, -26.0) filhos=3 renderers=2 tamanho=(1.14, 1.75, 1.41) a=True b=True
+Valsa Valsa_1: ativo=True pos=(10.0, 0.0, -46.0) filhos=3 renderers=2 tamanho=(1.14, 1.75, 1.41) a=True b=True
+Portão com PortaoDuplo: True

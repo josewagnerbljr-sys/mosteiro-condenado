@@ -34,8 +34,18 @@ namespace MongeArcano.EditorTools
                 }
                 return null;
             };
+            BibliotecaUal.Provedor = () =>
+            {
+                var lista = new System.Collections.Generic.List<AnimationClip>();
+                foreach (Object o in AssetDatabase.LoadAllAssetsAtPath("Assets/Modelos/Animacoes/ual_animacoes.glb"))
+                {
+                    AnimationClip c = o as AnimationClip;
+                    if (c != null && !c.name.StartsWith("__preview__")) lista.Add(c);
+                }
+                return lista.ToArray();
+            };
             try { ConstrutorMundo.Construir(); }
-            finally { Modelos.ProvedorEditor = null; Modelos.Registro = null; }
+            finally { Modelos.ProvedorEditor = null; Modelos.Registro = null; BibliotecaUal.Provedor = null; }
             EditorSceneManager.SaveScene(cena, CaminhoCena);
             ConfigurarProjeto();
             AssetDatabase.SaveAssets();

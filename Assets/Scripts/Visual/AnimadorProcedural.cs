@@ -17,7 +17,7 @@ namespace MongeArcano
         public bool passos;
         public float estilo = 1.6f;
         public UalAnimador ual;
-        public bool EmUal { get { return ual != null; } }
+        public bool EmUal { get { return ual != null && ual.Pronto; } }
 
         Quaternion baseBE = Quaternion.identity, baseBD = Quaternion.identity, baseCorpoRot = Quaternion.identity;
         Vector3 baseCorpoPos, posAnt;
@@ -40,7 +40,7 @@ namespace MongeArcano
 
         void LateUpdate()
         {
-            if (ual != null) return;
+            if (ual != null && ual.Pronto) return;
             float dt = Time.deltaTime;
             if (dt <= 0f) return;
 

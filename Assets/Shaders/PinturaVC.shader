@@ -21,7 +21,7 @@ Shader "MongeArcano/PinturaVC"
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
             float v = saturate(IN.uv_MainTex.x);
-            float a = saturate(IN.uv_MainTex.y);
+            float a = saturate(1.0 - IN.uv_MainTex.y); // o glTFast inverte o V na importação
             float3 c = lerp(_Color.rgb, _Color2.rgb, a);
             o.Albedo = c * (0.35 + 0.9 * v);
             o.Metallic = lerp(_Metallic, 0.65, a);

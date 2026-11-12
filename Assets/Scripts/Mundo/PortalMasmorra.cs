@@ -73,8 +73,8 @@ namespace MongeArcano
             GameManager.Instance.Mostrar("Onda " + (o + 1) + " de 5", 3f);
             switch (o)
             {
-                case 0: Criar(TipoInimigo.Esqueleto, 4); break;
-                case 1: Criar(TipoInimigo.Esqueleto, 3); Criar(TipoInimigo.Possuido, 2); break;
+                case 0: Criar(TipoInimigo.Esqueleto, 3); Criar(TipoInimigo.Puglin, 3); break;
+                case 1: Criar(TipoInimigo.Puglin, 4); Criar(TipoInimigo.Possuido, 2); break;
                 case 2: Criar(TipoInimigo.Armadura, 2); Criar(TipoInimigo.Esqueleto, 3); Criar(TipoInimigo.BruxaCinza, 1); break;
                 case 3: Criar(TipoInimigo.Infernal, 2); Criar(TipoInimigo.Armadura, 2); Criar(TipoInimigo.BruxaNegra, 1); break;
                 default: Criar(TipoInimigo.Monstro, 1); Criar(TipoInimigo.Infernal, 2); Criar(TipoInimigo.BruxaVermelha, 1); break;

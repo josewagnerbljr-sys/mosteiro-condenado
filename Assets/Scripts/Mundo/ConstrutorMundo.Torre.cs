@@ -14,18 +14,38 @@ namespace MongeArcano
             raiz.transform.position = pos;
             raiz.transform.rotation = Quaternion.Euler(0f, rotY, 0f);
             Transform t = raiz.transform;
-            ProceduralModels.Prim(PrimitiveType.Cube, t, "Base", new Vector3(0f, 0.35f, 0f), new Vector3(1.3f, 0.7f, 0.85f), "Madeira", true);
-            ProceduralModels.Prim(PrimitiveType.Cube, t, "Faixa", new Vector3(0f, 0.35f, 0f), new Vector3(1.34f, 0.1f, 0.9f), "Ouro");
-            GameObject pivo = new GameObject("Tampa");
-            pivo.transform.SetParent(t, false);
-            pivo.transform.localPosition = new Vector3(0f, 0.7f, -0.42f);
-            ProceduralModels.Prim(PrimitiveType.Cube, pivo.transform, "TampaMesh", new Vector3(0f, 0.12f, 0.42f), new Vector3(1.3f, 0.25f, 0.85f), "Madeira");
-            ProceduralModels.Prim(PrimitiveType.Sphere, t, "Fechadura", new Vector3(0f, 0.62f, 0.45f), Vector3.one * 0.14f, "EmissaoDourada");
+            Transform tampaT = null;
+            GameObject modelo = Modelos.Instanciar("prop_bau", t, 0f, 0f);
+            if (modelo != null)
+            {
+                modelo.transform.localPosition = Vector3.zero;
+                modelo.transform.localScale = Vector3.one * 1.25f;
+                tampaT = AcharFilho(modelo.transform, "Chest_Top");
+                BoxCollider bc = raiz.AddComponent<BoxCollider>();
+                bc.center = new Vector3(0f, 0.45f, 0f); bc.size = new Vector3(1.6f, 0.9f, 1f);
+            }
+            if (tampaT == null)
+            {
+                ProceduralModels.Prim(PrimitiveType.Cube, t, "Base", new Vector3(0f, 0.35f, 0f), new Vector3(1.3f, 0.7f, 0.85f), "Madeira", true);
+                ProceduralModels.Prim(PrimitiveType.Cube, t, "Faixa", new Vector3(0f, 0.35f, 0f), new Vector3(1.34f, 0.1f, 0.9f), "Ouro");
+                GameObject pivo = new GameObject("Tampa");
+                pivo.transform.SetParent(t, false);
+                pivo.transform.localPosition = new Vector3(0f, 0.7f, -0.42f);
+                ProceduralModels.Prim(PrimitiveType.Cube, pivo.transform, "TampaMesh", new Vector3(0f, 0.12f, 0.42f), new Vector3(1.3f, 0.25f, 0.85f), "Madeira");
+                tampaT = pivo.transform;
+            }
             ProceduralModels.Luz(t, "Luz", new Vector3(0f, 1.2f, 0f), new Color(1f, 0.75f, 0.3f), 1.1f, 5f, true);
             Bau b = raiz.AddComponent<Bau>();
-            b.tampa = pivo.transform;
+            b.tampa = tampaT;
             b.itens = itens;
             b.bonusRaridade = bonus;
+        }
+
+        static Transform AcharFilho(Transform t, string nome)
+        {
+            if (t.name == nome) return t;
+            for (int i = 0; i < t.childCount; i++) { Transform r = AcharFilho(t.GetChild(i), nome); if (r != null) return r; }
+            return null;
         }
 
         static void Degraus(Transform pai, float x0, float sentido, float z, float yBase, int n)
